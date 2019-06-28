@@ -38,6 +38,20 @@ else:
     if response.status_code in [200, 301, 302, 304]:
         data = response.json()
         print(data)
+        last_refreshed = data["dt"]
+
+        
+        
+        
+        
+        
+        
+        
+        #print(data['name'])
+        
+        
+        
+        #print(data)
      
     else:
         print("OOPS")
