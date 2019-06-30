@@ -4,10 +4,14 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
+#
+# GET /
+#
 
 @app.route('/')
 def index():
-    return "Hello World"
+    print("VISITING THE START PAGE")
+    return 
 
 
 @app.route('/profile/<int:post_id>')

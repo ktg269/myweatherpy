@@ -52,7 +52,7 @@ if confirmation == "n":
 else:
     print("------------------------------")
     print("Awesome choice! For the best search result, please consider the followings:\n" 
-        "If you would like to search for U.S. cities, please enter 5 digit-zip code (e.g. 10004) for the most accurate result.\n" 
+        "If you would like to search for U.S. cities, please enter 5-digit zip code (e.g. 10004) for the most accurate result.\n" 
         "For non-U.S, please ensure to enter BOTH city name and two-letter country code (london,uk) for the best result. \n"
         "If you are unsure about the country code, please enter help.")
 
@@ -239,7 +239,7 @@ else:
                     print("WEATHER FORECAST FOR EVERY 3 HOURS FOR THE NEXT 5 DAYS")
                     print("-------------------------")
                     print("Your Selected City: " f"{city_name}" + "  " f"{city_code}")
-                    print("Date      ", "Time ", "Weather  ", "Details   ", "Temp(C)", "High(C)", "Low(C)", "Temp(F)", "High(F)", "Low(F)", "Humidity(%)")
+                    print("Date & Time", "\t", "\tWeather", "Temp(C)", "High(C)", "Low(C)", "Temp(F)", "High(F)", "Low(F)", "\tHumidity(%)")
                     print("-------------------------")    
                     for f in list_forecast:
                         forecast_date = f["dt"]
@@ -255,7 +255,7 @@ else:
                             forecast_weather_detail = q["description"]
                             forecast_weather_id = q["id"]
                 
-                            print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} {forecast_weather2} {forecast_weather_detail} {toCelcius(forecast_temp)}C {toCelcius(forecast_temp_high)}C {toCelcius(forecast_temp_min)}C {toFahrenheit(forecast_temp)}F {toFahrenheit(forecast_temp_high)}F {toFahrenheit(forecast_temp_min)}F {forecast_hum}%")
+                            print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} \t{forecast_weather2} \t{toCelcius(forecast_temp)}C \t{toCelcius(forecast_temp_high)}C \t{toCelcius(forecast_temp_min)}C \t{toFahrenheit(forecast_temp)}F \t{toFahrenheit(forecast_temp_high)}F \t{toFahrenheit(forecast_temp_min)}F \t{forecast_hum}%")
 
                         file_name3 = "forecast" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".csv"
                         csv_file_path3 = os.path.join(os.path.dirname(__file__), "..", "data", file_name3)
@@ -290,13 +290,11 @@ else:
                                 line_count = 0
                                 for row in csv_reader:
                                     if line_count ==0:
-                                        print(f'        Number, Name, Type, Website:')
+                                        print(f'is, name, type, website:')
                                         print("-------------------------")
                                         line_count += 1
                                     else:
-                                        dict_csv = f'\t{row[0]} {row[1]}, {row[2]}, {row[3]}'
-                                        breakpoint()
-                                        
+                                        dict_csv = f'{row[0]} {row[1]}, {row[2]}, {row[3]}'                                                                        
                                         print(dict_csv)
                                         line_count += 1         
                             print("-------------------------")
@@ -304,8 +302,28 @@ else:
                                 open_web = input("If you want to navigate any website above, please press the number: ")
                                 if open_web not in ["1","2","3","4","5","6","7","8","9","10","11"]:
                                     print("Oops. Please make your selection again.")
+
                                 else:
-                                  
+                                    # Referece: https://stackoverflow.com/questions/46416570/how-to-format-a-list-of-dictionaries-from-csv-python    
+                                    suggestion_list =[]                               
+                                    with open(csv_file_path1) as f:
+                                        reader = list(csv.reader(f))
+                                        for row in reader[1:]:
+                                            web_dict ={}
+                                            web_dict["id"] = row[0]
+                                            web_dict["name"] = row[1]
+                                            web_dict["type"] = row[2]
+                                            web_dict["website"] = row[3]
+                                            suggestion_list.append(web_dict)
+
+                                    def link_site(x):
+                                        return x["id"] == open_web
+
+                                    f_site = list(filter(link_site, suggestion_list))
+
+                                    for st in f_site:
+                                        site_search = st["website"]
+
                                     # Reference: class the Selenium package demonstration
                                     CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chromedriver.exe") # (or wherever yours is installed)
                                     driver = webdriver.Chrome(CHROMEDRIVER_PATH)
@@ -324,13 +342,13 @@ else:
                                     #
                                     # INTERACT WITH THE ELEMENT
                                     #
-                                    search_term = "www.priceline.com"
+                                    search_term = site_search
                                     searchbox.send_keys(search_term)
                                     searchbox.send_keys(Keys.RETURN)
                                     print(driver.title) #> user_input city or zipcode - Google Search'
                                     driver.save_screenshot("search_results.png")
-
-
+                                    break
+                                
                                    
 
 
