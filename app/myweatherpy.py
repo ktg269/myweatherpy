@@ -15,19 +15,19 @@ import pprint
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timezone
 from pytz import timezone
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from timezonefinder import TimezoneFinder
 
 load_dotenv()
 
 API_KEY =os.environ.get("openweather_API") # to obtain API_KEY from env file. 
 #API_KEY2 =os.environ.get("darksky_api")
 
-current_time = datetime.now()  #> current time
-formatted_current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")  #>'2019-06-21 14:00:00' (reference: from prior class discussion)
+
 
 
 #
@@ -102,25 +102,52 @@ else:
                 
                     data = response.json()
 
-                    # Set up a variable for latest refresh time at timezone where the script is run (where the search happened)
+
+                    current_time = datetime.now()  #> current time
+                    formatted_current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")  #>'2019-06-21 14:00:00' (reference: from prior class discussion)
+                    
+                    local_lon = data["coord"]["lon"] # To set up local time (based on input) using latitude/longitutde
+                    local_lat = data["coord"]["lat"]
+                    
+                    tf = TimezoneFinder(in_memory=True) # Reference: https://pypi.org/project/timezonefinder/
+                    timezone_region = tf.closest_timezone_at(lng=local_lon, lat=local_lat)
+                    
+                    utcmoment_naive = datetime.utcnow() # Reference: https://stackoverflow.com/questions/10997577/python-timezone-conversion
+                    utcmoment = utcmoment_naive.replace(tzinfo=pytz.utc)
+                    localdatetime = utcmoment.astimezone(pytz.timezone(timezone_region))
+                    formatted_localdatetime = localdatetime.strftime('%Y-%m-%d %H:%M:%S')
+                    formatted_localdatetimezone = localdatetime.strftime('%Z')
+                    
+
+                    # Set up a variable for latest refresh time at timezone where the script is run (the region for the search)
                     import tzlocal
                     last_time = data["dt"]  # Reference: https://stackoverflow.com/questions/3682748/converting-unix-timestamp-string-to-readable-date        
                     unix_timestamp = float(last_time)    
                     my_timezone = tzlocal.get_localzone()  #get pytz timezone
                     my_time = datetime.fromtimestamp(unix_timestamp, my_timezone)
+                    formatted_my_time = my_time.strftime('%Y-%m-%d %H:%M:%S')
 
                     last_timezone = data["timezone"]
                     unix_timezone = float(last_timezone)    
                     my_timezone2 = tzlocal.get_localzone()  #get pytz timezone
                     my_time2 = datetime.fromtimestamp(unix_timezone, my_timezone2)
+                    formatted_my_time2 = my_time2.strftime('%Z')
                     #print(f"{my_time.strftime('%Y-%m-%d %H:%M:%S')}" + "  " f"{(my_time2.strftime('%Z'))}")
 
-                    # To show the current time at the local time zone
+                    #print(my_time)
+                                   
 
-                    current_local_time = datetime.fromtimestamp(unix_timestamp)
-                    friendly_current_local_time = current_local_time.strftime('%Y-%m-%d %H:%M:%S')
-                    friendly_local_time = datetime.fromtimestamp(unix_timestamp)   #reference: https://stackoverflow.com/questions/3682748/converting-unix-timestamp-string-to-readable-date
-                    friendly_local_timezone = datetime.utcfromtimestamp(last_timezone).strftime('%Z')  #TODO: Need to fix the timezone display
+                    #localrefreshdatetime = utcmoment.astimezone(pytz.timezone(my_time))
+                    #formatted_localrefreshdatetime = localrefreshdatetime.strftime('%Y-%m-%d %H:%M:%S')
+                    #print(formatted_localrefreshdatetime)
+
+                    # To show the current time at the local time zone
+                    #last_refreshed_local_time = datetime.fromtimestamp(last_time).strftime('%Y-%m-%d %H:%M:%S')
+                    #current_local_time = datetime.fromtimestamp(unix_timestamp)
+                    #friendly_current_local_time = current_local_time.strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    #friendly_local_time = datetime.fromtimestamp(unix_timestamp)   #reference: https://stackoverflow.com/questions/3682748/converting-unix-timestamp-string-to-readable-date
+                    #friendly_local_timezone = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(unix_timestamp))  #TODO: Need to fix the timezone display
                     #print(f"{friendly_local_time}" + "  " f"{friendly_local_timezone}")           
 
                     # Set up city name and country code
@@ -173,15 +200,15 @@ else:
                     # Set up a variable for current temp
                     last_refreshed_hum = data["main"]["humidity"] 
                     #print(f"{(last_refreshed_hum)}"+"%")
-
+                    
                     print("------------------------------")
                     print("Here is the result:")
                     print("------------------------------")
                     print("Name of city and country:  " f"{city_name}" + "  " f"{city_code}")
-                    print("Current Time based on your location: " f"{formatted_current_time}")
-                    print("Current Local Time based on your input:  " f"{friendly_current_local_time}")
-                    print("Last Refreshed at your time: " f"{my_time.strftime('%Y-%m-%d %H:%M:%S')}" + "  " f"{(my_time2.strftime('%Z'))}")
-                    print("Last Refreshed at local time: " f"{friendly_local_time}" + "  " f"{friendly_local_timezone}")
+                    print("Current Local Time based on your input:  " f"{formatted_localdatetime}" " " f"{formatted_localdatetimezone}")
+                    print("Current Time based on your location: " f"{formatted_current_time}" " " f"{formatted_my_time2}")
+                    #print("Last Refreshed at local time: " f"{last_refreshed_local_time}" + "  " f"{friendly_local_timezone}")
+                    print("Last Refreshed based on your location: " f"{formatted_my_time}" + "  " f"{formatted_my_time2}")                  
                     print("------------------------------") 
                     print("Weather Condition: " f"{weather_condition}")
                     print("Weather Additional Description: " f"{weather_description}")
@@ -197,14 +224,15 @@ else:
                     #Writine CSV file for current weather output.
                     file_name2 = "current" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".csv"
                     csv_file_path2 = os.path.join(os.path.dirname(__file__), "..", "data", file_name2)
-                    csv_headers = ["City", "Code", "Time", "Weather", "Temp(C)", "Temp(F)", "Humidity(%)"]
+                    csv_headers = ["City", "Code", "My Time", "Local Time", "Weather", "Temp(C)", "Temp(F)", "Humidity(%)"]
                     with open(csv_file_path2, "w", newline='') as csv_file:
                         writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
                         writer.writeheader() # uses fieldnames set above
                         writer.writerow({
                             "City": city_name,
                             "Code": city_code,
-                            "Time": current_local_time,
+                            "My Time": formatted_current_time,
+                            "Local Time": formatted_localdatetime,
                             "Weather": weather_condition,
                             "Temp(C)": toCelcius(last_refreshed_temp),
                             "Temp(F)": toFahrenheit(last_refreshed_temp),
@@ -244,7 +272,7 @@ else:
                     for f in list_forecast:
                         forecast_date = f["dt"]
                         forecast_unix_timestamp = float(forecast_date)    
-                        forecast_my_time = datetime.fromtimestamp(forecast_unix_timestamp, my_timezone)    
+                        forecast_my_time = datetime.fromtimestamp(forecast_unix_timestamp, my_timezone)   
                         forecast_temp = f["main"]["temp"]
                         forecast_temp_high = f["main"]["temp_max"]
                         forecast_temp_min = f["main"]["temp_min"]
@@ -348,12 +376,7 @@ else:
                                     print(driver.title) #> user_input city or zipcode - Google Search'
                                     driver.save_screenshot("search_results.png")
                                     break
-                                
-                                   
-
-
-
-
+                            
 
                         elif choice =="2":
                             print("We understand ! Hopefully our service has helped you to plan appropriately.")
@@ -392,12 +415,7 @@ else:
                             print(driver.title) #> user_input city or zipcode - Google Search'
                             driver.save_screenshot("search_results.png")
 
-                            #
-                            # ALWAYS QUIT THE DRIVER
-                            #
-
-                            #driver.quit()
-                            
+                            # Let user decide to close the web browser. Once closing, it moves to the next.
                             
                         elif choice =="4":
                             print("OK. We hope we provided helpful information for you")
@@ -456,7 +474,7 @@ else:
                 
                         else:
                             print("------------------------------")
-                            print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future") # No email receipt if customer does not select y.
+                            print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future!") # No email receipt if customer does not select y.
                             print("------------------------------")
                             print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer experience.")
                             print("Good-Bye~")
