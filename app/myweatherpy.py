@@ -11,6 +11,8 @@ import time
 import csv
 import pprint
 
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 from datetime import datetime
 from pytz import timezone
@@ -187,6 +189,24 @@ else:
                     print("-------------------------")
                     print("Friendly Advice (based on the weather condition): " f"{my_message}")
                     print("-------------------------")
+
+                    #Writine CSV file for current weather output.
+                    file_name2 = "current" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".csv"
+                    csv_file_path2 = os.path.join(os.path.dirname(__file__), "..", "data", file_name2)
+                    csv_headers = ["City", "Code", "Time", "Weather", "Temp(C)", "Temp(F)", "Humidity(%)"]
+                    with open(csv_file_path2, "w", newline='') as csv_file:
+                        writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
+                        writer.writeheader() # uses fieldnames set above
+                        writer.writerow({
+                            "City": city_name,
+                            "Code": city_code,
+                            "Time": current_local_time,
+                            "Weather": weather_condition,
+                            "Temp(C)": toCelcius(last_refreshed_temp),
+                            "Temp(F)": toFahrenheit(last_refreshed_temp),
+                            "Humidity(%)": last_refreshed_hum,
+                        })
+                    print("Your result has been saved in /data folder with city name, code and current time")
                 else:
                     print("ERROR: " +f"{response.status_code}")
                     if response.status_code ==404:
@@ -199,7 +219,7 @@ else:
 
                     # To set up next 5 days forecast
 
-                pause_input = input("Please review the result. When ready, please press any button to see the weather forecast  ")
+                pause_input = input("Please review the result. When ready, please press any button to see the weather forecast:  ")
                 print("-------------------------")
 
                 request_url_4 = f"https://api.openweathermap.org/data/2.5/forecast?zip={user_input}&appid={API_KEY}"
@@ -231,9 +251,25 @@ else:
                             forecast_weather_detail = q["description"]
                             forecast_weather_id = q["id"]
                 
-                        print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} {forecast_weather2} {forecast_weather_detail} {toCelcius(forecast_temp)}C {toCelcius(forecast_temp_high)}C {toCelcius(forecast_temp_min)}C {toFahrenheit(forecast_temp)}F {toFahrenheit(forecast_temp_high)}F {toFahrenheit(forecast_temp_min)}F {forecast_hum}%")
-                        
-                    print("-------------------------")
+                            print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} {forecast_weather2} {forecast_weather_detail} {toCelcius(forecast_temp)}C {toCelcius(forecast_temp_high)}C {toCelcius(forecast_temp_min)}C {toFahrenheit(forecast_temp)}F {toFahrenheit(forecast_temp_high)}F {toFahrenheit(forecast_temp_min)}F {forecast_hum}%")
+
+                        file_name3 = "forecast" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".csv"
+                        csv_file_path3 = os.path.join(os.path.dirname(__file__), "..", "data", file_name3)
+                        csv_headers = ["City", "Code", "Time", "Weather", "Temp(C)", "Temp(F)", "Humidity(%)"]
+                        with open(csv_file_path3, "w", newline='') as csv_file:
+                            writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
+                            writer.writeheader() # uses fieldnames set above
+                            writer.writerow({
+                                "City": city_name,
+                                "Code": city_code,
+                                "Time": forecast_my_time,
+                                "Weather": forecast_weather2,
+                                "Temp(C)": toCelcius(forecast_temp),
+                                "Temp(F)": toFahrenheit(forecast_temp),
+                                "Humidity(%)": forecast_hum,
+                            })
+                    print("Your result has been saved in /data folder with name forecast, city name, code and current time")                       
+                    print("-------------------------")   
                     while True:
                         choice = input("WHAT IS THE REASON FOR YOUR SEARCH OF WEATHER CONDITION?\n"
                         "1. Traveling the area (Vacation, Work, Family Visit etc)\n"
@@ -255,12 +291,13 @@ else:
                                     else:
                                         print(f'\t{row[0]}, {row[1]}, {row[2]}')
                                         line_count += 1
-                
+
                         elif choice =="2":
-                            
+                            print("We understand ! Hopefully our service has helped you to plan appropriately.")
                             exit()
                         elif choice =="3":
-                            #TODO
+                            print("No problem. Perhaps, you can read more about the city. You may find it interesting! Here is the website")
+                            print("www.wikipedia.com")
                             exit()
                         elif choice =="4":
                             print("OK. We hope we provided helpful information for you. Please visit us again. Good-Bye ~")
@@ -268,28 +305,55 @@ else:
                         else:
                             print("OOPS. We do not recognize your choice. Please choose again")
                             print("------------------------------")
+                    
+                        print("------------------------------")
+                        final_input = input("Thank you so much for using MyweatherPy service. Would you like to also receive the output in the email? Press y to receive. Otherwise, press any key to exit: ")
+                        if final_input =="y":
+                            user_email_input = input("PLEASE ENTER YOUR EMAIL ADDRESS: ") # asking user email address for input.
+                            
+                            
+                            SENDGRID_API_KEY = os.environ.get("sendgrid_api_key", "OOPS, please set env var called 'SENDGRID_API_KEY'")  #private information included in .env
+                            SENDGRID_TEMPLATE_ID = os.environ.get("sendgrid_template_ID", "OOPS, please set env var called 'SENDGRID_TEMPLATE_ID'") #private information included in .env
+                            MY_ADDRESS = os.environ.get("my_email_address", "OOPS, please set env var called 'MY_EMAIL_ADDRESS'") #private information included in .env
+                            
+                            template_data = {   # showing the checkout timestamp and the total price on the email receipt (minimum level of information per instruction)
+                                "human_friendly_timestamp": str(current_time.strftime("%Y-%m-%d %I:%M %p")),
+                                "city_name": str(city_name)+str(city_code),
+                                "current_weather_condition": str(weather_condition),
+                                "currrent_weather_description": str(weather_description),
+                                "current_temp_C": str(toCelcius(last_refreshed_temp)),
+                                "current_temp_F": str(toFahrenheit(last_refreshed_temp)),
+                                "current_hum": str((last_refreshed_hum)),
+                                "friendly_advice": str(my_message),
 
-                        file_name2 = city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".csv"
-                        csv_file_path2 = open((os.path.join(os.path.dirname(__file__), "..", "data", file_name2)), "w")
-                        csv_headers = ["City", "Code", "Time", "Weather", "Temp(C)", "Temp(F)", "Humidity(%)"]
-
-                        with open(csv_file_path2, "w", newline='') as csv_file:
-                            writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
-                            writer.writeheader() # uses fieldnames set above
-                            writer.writerow({
-                                "City": city_name,
-                                "Code": city_code,
-                                "Time": current_local_time,
-                                "Weather": weather_condition,
-                                "Temp(C)": toCelcius(last_refreshed_temp),
-                                "Temp(F)": toFahrenheit(last_refreshed_temp),
-                                "Humidity(%)": last_refreshed_hum,
-                            })
-                        
-                        
-                   
-
-
+                            }
+                            client = SendGridAPIClient(SENDGRID_API_KEY) #> <class 'sendgrid.sendgrid.SendGridAPIClient>
+                            print("CLIENT:", type(client))
+                
+                            message = Mail(from_email=MY_ADDRESS, to_emails=user_email_input) # For to_emails, MY_ADDRESS is replaced with user_input from line 133.
+                            print("MESSAGE:", type(message))
+                
+                            message.template_id = SENDGRID_TEMPLATE_ID
+                
+                            message.dynamic_template_data = template_data
+                
+                            try:
+                                response = client.send(message)
+                                print("RESPONSE:", type(response)) #> <class 'python_http_client.client.Response'>
+                                print(response.status_code) #> 202 indicates SUCCESS
+                                print(response.body)
+                                print(response.headers)
+                
+                            except Exception as e:
+                                print("OOPS", e.message)
+                
+                            print("Your report has been sent to the email address that your provided.")
+                            print("Thank you for using MyweatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the customer and/or encouraging the customer to shop again
+                            exit()
+                
+                        else:
+                            print("No problem. Thank you, so much again. Hopefully you will visit us again in the future. Good-Bye ~") # No email receipt if customer does not select y.
+                            exit() 
 
 
                 else:
