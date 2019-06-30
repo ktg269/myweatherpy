@@ -1,3 +1,6 @@
 requests
 python-dotenv
 tzlocal
+sendgrid==6.0.5
+pillow
+selenium

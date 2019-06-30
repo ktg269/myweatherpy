@@ -11,11 +11,15 @@ import time
 import csv
 import pprint
 
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 from datetime import datetime
 from pytz import timezone
+from PIL import Image
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 load_dotenv()
 
@@ -31,9 +35,9 @@ formatted_current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")  #>'2019-06-
 #
 #
 
-
+print("------------------------------")
 print("Welcome to MyWeatherPy. We are here to help you to provide information\n"
-            "about your curiosity in the weather condition anywhere")
+            "about your curiosity in the weather condition for you!")
 print("------------------------------")
 # Ask User Input
 confirmation = input("Are you ready to explore MyWeatherPy?\n" 
@@ -48,8 +52,8 @@ if confirmation == "n":
 else:
     print("------------------------------")
     print("Awesome choice! For the best search result, please consider the followings:\n" 
-        "If you would like to search for U.S. cities, please enter 5 digit-zip code (e.g. 10004) for the most accurate result\n" 
-        "For non-U.S, please ensure to enter BOTH city name and two-letter country code (london,uk) for the best result \n"
+        "If you would like to search for U.S. cities, please enter 5 digit-zip code (e.g. 10004) for the most accurate result.\n" 
+        "For non-U.S, please ensure to enter BOTH city name and two-letter country code (london,uk) for the best result. \n"
         "If you are unsure about the country code, please enter help.")
 
     #User makes input
@@ -268,7 +272,7 @@ else:
                                 "Temp(F)": toFahrenheit(forecast_temp),
                                 "Humidity(%)": forecast_hum,
                             })
-                    print("Your result has been saved in /data folder with name forecast, city name, code and current time")                       
+                    print("Your result has been saved in /data folder under name forecast, city name, code and current time.")                       
                     print("-------------------------")   
                     while True:
                         choice = input("WHAT IS THE REASON FOR YOUR SEARCH OF WEATHER CONDITION?\n"
@@ -280,34 +284,112 @@ else:
                         if choice =="1":
                             print("Great. If you have not fully finalized your travel plan yet, these websites can help you to complete your exciting trip!")
                             csv_file_path1 = os.path.join(os.path.dirname(__file__), "..", "list", "travel_vendor.csv")
+                            
                             with open(csv_file_path1, "r") as csv_file:
                                 csv_reader = csv.reader(csv_file, delimiter=',')
                                 line_count = 0
                                 for row in csv_reader:
                                     if line_count ==0:
-                                        print(f'        Name, Type, website:')
+                                        print(f'        Number, Name, Type, Website:')
                                         print("-------------------------")
                                         line_count += 1
                                     else:
-                                        print(f'\t{row[0]}, {row[1]}, {row[2]}')
-                                        line_count += 1
+                                        dict_csv = f'\t{row[0]} {row[1]}, {row[2]}, {row[3]}'
+                                        breakpoint()
+                                        
+                                        print(dict_csv)
+                                        line_count += 1         
+                            print("-------------------------")
+                            while True:
+                                open_web = input("If you want to navigate any website above, please press the number: ")
+                                if open_web not in ["1","2","3","4","5","6","7","8","9","10","11"]:
+                                    print("Oops. Please make your selection again.")
+                                else:
+                                  
+                                    # Reference: class the Selenium package demonstration
+                                    CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chromedriver.exe") # (or wherever yours is installed)
+                                    driver = webdriver.Chrome(CHROMEDRIVER_PATH)
+                                    #
+                                    # NAVIGATE TO GOOGLE.COM
+                                    #
+                                    driver.get("https://www.google.com/")
+                                    print(driver.title) #> Google
+                                    driver.save_screenshot("search_page.png")  
+                                    #
+                                    # FIND AN ELEMENT TO INTERACT WITH...
+                                    # a reference to the HTML element:
+                                    # <input title="Search">
+                                    searchbox_xpath = '//input[@title="Search"]'
+                                    searchbox = driver.find_element_by_xpath(searchbox_xpath)
+                                    #
+                                    # INTERACT WITH THE ELEMENT
+                                    #
+                                    search_term = "www.priceline.com"
+                                    searchbox.send_keys(search_term)
+                                    searchbox.send_keys(Keys.RETURN)
+                                    print(driver.title) #> user_input city or zipcode - Google Search'
+                                    driver.save_screenshot("search_results.png")
+
+
+                                   
+
+
+
+
 
                         elif choice =="2":
                             print("We understand ! Hopefully our service has helped you to plan appropriately.")
-                            exit()
+                            
                         elif choice =="3":
-                            print("No problem. Perhaps, you can read more about the city. You may find it interesting! Here is the website")
-                            print("www.wikipedia.com")
-                            exit()
+                            print("No problem. Perhaps, you can read more about the city. You may find it interesting! Here is the website that you can learn more about the city!")
+                            # Reference: class the Selenium package demonstration
+                            CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chromedriver.exe") # (or wherever yours is installed)
+
+                            driver = webdriver.Chrome(CHROMEDRIVER_PATH)
+                            #
+                            # NAVIGATE TO GOOGLE.COM
+                            #
+                            driver.get("https://www.google.com/")
+                            print(driver.title) #> Google
+                            driver.save_screenshot("search_page.png")  
+                            #
+                            # FIND AN ELEMENT TO INTERACT WITH...
+                            # a reference to the HTML element:
+                            # <input title="Search">
+
+                            searchbox_xpath = '//input[@title="Search"]'
+                            searchbox = driver.find_element_by_xpath(searchbox_xpath)
+
+                            #
+                            # INTERACT WITH THE ELEMENT
+                            #
+
+                            if user_input.isnumeric():
+                                search_term = city_name + " " + city_code
+                            else:    
+                                search_term = user_input
+                            searchbox.send_keys(search_term)
+                            searchbox.send_keys(Keys.RETURN)
+                            
+                            print(driver.title) #> user_input city or zipcode - Google Search'
+                            driver.save_screenshot("search_results.png")
+
+                            #
+                            # ALWAYS QUIT THE DRIVER
+                            #
+
+                            #driver.quit()
+                            
+                            
                         elif choice =="4":
-                            print("OK. We hope we provided helpful information for you. Please visit us again. Good-Bye ~")
-                            exit()
+                            print("OK. We hope we provided helpful information for you")
+                            
                         else:
                             print("OOPS. We do not recognize your choice. Please choose again")
                             print("------------------------------")
                     
                         print("------------------------------")
-                        final_input = input("Thank you so much for using MyweatherPy service. Would you like to also receive the output in the email? Press y to receive. Otherwise, press any key to exit: ")
+                        final_input = input("Would you like to also receive the output in the email? Press y to receive. Otherwise, press any key to exit: ")
                         if final_input =="y":
                             user_email_input = input("PLEASE ENTER YOUR EMAIL ADDRESS: ") # asking user email address for input.
                             
@@ -349,10 +431,20 @@ else:
                 
                             print("Your report has been sent to the email address that your provided.")
                             print("Thank you for using MyweatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the customer and/or encouraging the customer to shop again
+                            image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg1.jpg")
+                            img = Image.open(image_path)
+                            img.show()
                             exit()
                 
                         else:
-                            print("No problem. Thank you, so much again. Hopefully you will visit us again in the future. Good-Bye ~") # No email receipt if customer does not select y.
+                            print("------------------------------")
+                            print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future") # No email receipt if customer does not select y.
+                            print("------------------------------")
+                            print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer experience.")
+                            print("Good-Bye~")
+                            image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg1.jpg")
+                            img = Image.open(image_path)
+                            img.show()
                             exit() 
 
 
