@@ -10,10 +10,12 @@ import pytz
 import time
 import csv
 import pprint
+import string
+import base64
 
 
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition, ContentId
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 from pytz import timezone
@@ -25,15 +27,7 @@ from timezonefinder import TimezoneFinder
 load_dotenv()
 
 API_KEY =os.environ.get("openweather_API") # to obtain API_KEY from env file. 
-#API_KEY2 =os.environ.get("darksky_api")
 
-
-
-
-#
-#
-#
-#
 
 print("------------------------------")
 print("Welcome to MyWeatherPy. We are here to help you to provide information\n"
@@ -72,7 +66,7 @@ else:
                         print(f'        Country name, Code:')
                         line_count += 1
                     else:
-                        print(f'\t{row[0]}, {row[1]} {row[2]}')
+                        print(f'{row[0]}, {row[1]} {row[2]}')
                         line_count += 1           
           
         elif user_input.isnumeric() and len(user_input) !=5:  # PRELIM VALIDATION if zip code is not 5 digits. #source: https://stackoverflow.com/questions/30994738/how-to-make-input-only-accept-a-z-etc
@@ -84,13 +78,15 @@ else:
         elif user_input == "":  # PRELIM VALIDATION if no input is made, but hit enter.
             print("-------------------------")
             print("ERROR MESSAGE:")
+            print("Oops. It looks like you just hit the enter by mistake. Please provide us your input!")
+            print("-------------------------")
+
+        elif user_input in ["!","@","#","$","%","^","&","*",")","(","-","_","=","+","[","}","[","{",":",";","'",'"',"/","?",".",">",",","<","`","~"]:
+            print("-------------------------")
+            print("ERROR MESSAGE:")
             print("OH, PLEASE ONLY USE THE LETTERS or 5 DIGIT ZIP CODE FOR YOUR INPUT. PLEASE TRY AGAIN.")
             print("-------------------------")
 
-        #elif not user_input.isalpha(): # PRELIM VALIDATION for limiting the number of letters equal to or less than 6. # Source: https://stackoverflow.com/questions/8761778/limiting-python-input-strings-to-certain-characters-and-lengths
-        #    print("-------------------------")
-        #    print("ERROR MESSAGE:")
-        #    print("OH, PLEASE ONLY USE THE LETTERS or 5 DIGIT ZIP CODE FOR YOUR INPUT. PLEASE TRY AGAIN.")
         else:
         # Request weather, condition, forecast etc using API credentials through HTML request. Priority: Zip code (number first as it gives more accurate. Then, find city,code)
             request_url_2 = f"https://api.openweathermap.org/data/2.5/weather?zip={user_input}&appid={API_KEY}"
@@ -239,6 +235,7 @@ else:
                             "Humidity(%)": last_refreshed_hum,
                         })
                     print("Your result has been saved in /data folder with city name, code and current time")
+                    print("-------------------------")
                 else:
                     print("ERROR: " +f"{response.status_code}")
                     if response.status_code ==404:
@@ -246,7 +243,7 @@ else:
                         exit()
                     
                     else: 
-                        print("THE SERVICE IS CURRENTLY UNAVAILABLE. PLEASE TRY IT AGAIN IN A LITTLE BIT.")
+                        print("THE SERVICE IS CURRENTLY UNAVAILABLE. PLEASE CHECK TRY IT AGAIN IN A LITTLE BIT.")
                         exit()
 
                     # To set up next 5 days forecast
@@ -260,11 +257,12 @@ else:
 
                 if response.status_code in [200, 300]:
                     data1 = response.json()
-                    #print(data1)
-                    
+                   
                     # Set up a variable for f
-                    list_forecast = data1["list"]
-                    print("WEATHER FORECAST FOR EVERY 3 HOURS FOR THE NEXT 5 DAYS")
+
+                    list_forecast = data1["list"]                    
+                                                                                                                    
+                    print("WEATHER FORECAST FOR EVERY 3 HOURS FOR THE NEXT 5 DAYS!")
                     print("-------------------------")
                     print("Your Selected City: " f"{city_name}" + "  " f"{city_code}")
                     print("Date & Time", "\t", "\tWeather", "Temp(C)", "High(C)", "Low(C)", "Temp(F)", "High(F)", "Low(F)", "\tHumidity(%)")
@@ -282,24 +280,28 @@ else:
                             forecast_weather2 = q["main"]
                             forecast_weather_detail = q["description"]
                             forecast_weather_id = q["id"]
-                
                             print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} \t{forecast_weather2} \t{toCelcius(forecast_temp)}C \t{toCelcius(forecast_temp_high)}C \t{toCelcius(forecast_temp_min)}C \t{toFahrenheit(forecast_temp)}F \t{toFahrenheit(forecast_temp_high)}F \t{toFahrenheit(forecast_temp_min)}F \t{forecast_hum}%")
 
-                        file_name3 = "forecast" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".csv"
-                        csv_file_path3 = os.path.join(os.path.dirname(__file__), "..", "data", file_name3)
-                        csv_headers = ["City", "Code", "Time", "Weather", "Temp(C)", "Temp(F)", "Humidity(%)"]
-                        with open(csv_file_path3, "w", newline='') as csv_file:
-                            writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
-                            writer.writeheader() # uses fieldnames set above
-                            writer.writerow({
-                                "City": city_name,
-                                "Code": city_code,
-                                "Time": forecast_my_time,
-                                "Weather": forecast_weather2,
-                                "Temp(C)": toCelcius(forecast_temp),
-                                "Temp(F)": toFahrenheit(forecast_temp),
-                                "Humidity(%)": forecast_hum,
-                            })
+                            file_name3 = "forecast" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S") + ".csv"
+                            csv_file_path3 = os.path.join(os.path.dirname(__file__), "..", "data", file_name3)
+
+                            csv_headers = ["City", "Code", "Time", "Temp(C)", "Temp(F)", "Humidity(%)"]
+
+                            with open(csv_file_path3, "w", newline='') as csv_file:
+                                writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
+                                writer.writeheader() # uses fieldnames set above
+
+                                for x in list_forecast:
+                                    writer.writerow({
+                                        "City": city_name,
+                                        "Code": city_code,
+                                        "Time": datetime.fromtimestamp(float(x["dt"]), my_timezone).strftime("%Y-%m-%d %I %p"),
+                                        #"Weather": list(map(lambda x: x["main"]["weather"]["main"], list_forecast)),
+                                        "Temp(C)": toCelcius(x["main"]["temp"]),
+                                        "Temp(F)": toFahrenheit(x["main"]["temp"]),
+                                        "Humidity(%)": x["main"]["humidity"]
+                                })
+                    print("-------------------------") 
                     print("Your result has been saved in /data folder under name forecast, city name, code and current time.")                       
                     print("-------------------------")   
                     while True:
@@ -330,7 +332,7 @@ else:
                                 open_web = input("If you want to navigate any website above, please press the number: ")
                                 if open_web not in ["1","2","3","4","5","6","7","8","9","10","11"]:
                                     print("Oops. Please make your selection again.")
-
+                                    break
                                 else:
                                     # Referece: https://stackoverflow.com/questions/46416570/how-to-format-a-list-of-dictionaries-from-csv-python    
                                     suggestion_list =[]                               
@@ -376,10 +378,11 @@ else:
                                     print(driver.title) #> user_input city or zipcode - Google Search'
                                     driver.save_screenshot("search_results.png")
                                     break
+                                   
                             
-
                         elif choice =="2":
                             print("We understand ! Hopefully our service has helped you to plan appropriately.")
+                            break
                             
                         elif choice =="3":
                             print("No problem. Perhaps, you can read more about the city. You may find it interesting! Here is the website that you can learn more about the city!")
@@ -414,21 +417,21 @@ else:
                             
                             print(driver.title) #> user_input city or zipcode - Google Search'
                             driver.save_screenshot("search_results.png")
+                            break
 
                             # Let user decide to close the web browser. Once closing, it moves to the next.
                             
                         elif choice =="4":
                             print("OK. We hope we provided helpful information for you")
+                            break
                             
                         else:
                             print("OOPS. We do not recognize your choice. Please choose again")
                             print("------------------------------")
-                    
-                        print("------------------------------")
+                        
                         final_input = input("Would you like to also receive the output in the email? Press y to receive. Otherwise, press any key to exit: ")
                         if final_input =="y":
                             user_email_input = input("PLEASE ENTER YOUR EMAIL ADDRESS: ") # asking user email address for input.
-                            
                             
                             SENDGRID_API_KEY = os.environ.get("sendgrid_api_key", "OOPS, please set env var called 'SENDGRID_API_KEY'")  #private information included in .env
                             SENDGRID_TEMPLATE_ID = os.environ.get("sendgrid_template_ID", "OOPS, please set env var called 'SENDGRID_TEMPLATE_ID'") #private information included in .env
@@ -436,24 +439,47 @@ else:
                             
                             template_data = {   # showing the checkout timestamp and the total price on the email receipt (minimum level of information per instruction)
                                 "human_friendly_timestamp": str(current_time.strftime("%Y-%m-%d %I:%M %p")),
-                                "city_name": str(city_name)+str(city_code),
+                                "city_name": str(city_name)+" " +str(city_code),
                                 "current_weather_condition": str(weather_condition),
                                 "currrent_weather_description": str(weather_description),
                                 "current_temp_C": str(toCelcius(last_refreshed_temp)),
                                 "current_temp_F": str(toFahrenheit(last_refreshed_temp)),
                                 "current_hum": str((last_refreshed_hum)),
                                 "friendly_advice": str(my_message),
-
                             }
                             client = SendGridAPIClient(SENDGRID_API_KEY) #> <class 'sendgrid.sendgrid.SendGridAPIClient>
                             print("CLIENT:", type(client))
                 
                             message = Mail(from_email=MY_ADDRESS, to_emails=user_email_input) # For to_emails, MY_ADDRESS is replaced with user_input from line 133.
                             print("MESSAGE:", type(message))
-                
+    
                             message.template_id = SENDGRID_TEMPLATE_ID
                 
                             message.dynamic_template_data = template_data
+    
+                            with open(csv_file_path3, 'rb') as f:
+                                data = f.read()
+                                f.close()
+                            encoded = base64.b64encode(data).decode()
+                            attachment = Attachment()
+                            attachment.file_content = FileContent(encoded)
+                            attachment.file_type = FileType('application/pdf')
+                            attachment.file_name = FileName('test.csv')
+                            attachment.disposition = Disposition('attachment')
+                            message.attachment = attachment
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
                 
                             try:
                                 response = client.send(message)
@@ -483,296 +509,19 @@ else:
                             img.show()
                             exit() 
 
-
                 else:
                     print("ERROR: " +f"{response.status_code}")
                     if response.status_code ==404:
                         print("PAGE NOT FOUND OR SERVER NOT FOUND. PLEASE CHECK AND TRY AGAIN. GOOD-BYE.")
                         exit()
-                            
-                        
-                    #print("-------------------------")    
-                    #F_option = input("Do you want to see the temperature in Fahrenheit? Press y to see. Otherwise, press any button:  ")
-                    #if F_option =="y":
-                    #    
-                    #    print("-------------------------") 
-                    #    for f in list_forecast:
-                    #        forecast_date_F = f["dt"]
-                    #        forecast_unix_timestamp_F = float(forecast_date_F)    
-                    #        forecast_my_time = datetime.fromtimestamp(forecast_unix_timestamp_F, my_timezone)    
-                    #        forecast_temp_F = f["main"]["temp"]
-                    #        forecast_temp_high_F = f["main"]["temp_max"]
-                    #        forecast_temp_min_F = f["main"]["temp_min"]
-                    #        forecast_hum_F = f["main"]["humidity"]
-                    #        forecast_weather_F = f["weather"]
-                    #        for q in forecast_weather_F:
-                    #            forecast_weather_F = q["main"]
-                    #            forecast_weather_detail_F = q["description"]
-                    #    print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} {forecast_weather_F} {forecast_weather_detail_F} {toFahrenheit(forecast_temp_F)}F {toFahrenheit(forecast_temp_high_F)}F {toFahrenheit(forecast_temp_min_F)}F {forecast_hum_F}")
-                    
-                        #print("-------------------------") 
-                        #while True:
-                        #    choice = input("WHAT IS THE REASON FOR YOUR SEARCH OF WEATHER CONDITION?\n"
-                        #    "1. Currently Living in the area\n"
-                        #    "2. Traveling the area (Vacation, Work, Family Visit etc)\n"
-                        #    "3. Planning for my next vacation !\n"
-                        #    "4. Being bored. Just Killing time\n"
-                        #    "Your Choice:  ") 
-                        #    if choice =="1":
-                        #        #>TODO
-                        #        exit()
-                        #    elif choice =="2":
-                        #        #>TODO
-                        #        exit()
-                        #    elif choice =="3":
-                        #        #TODO
-                        #        exit()
-                        #    elif choice =="4":
-                        #        #TODO
-                        #        exit()
-                        #    else:
-                        #        print("OOPS. We do not recognize your choice. Please choose again")
-                        #        print("------------------------------")
-
-
-
-                    
-                    
-                        
-        
-                    
-                    
-                    
-                    
-                    
-                    # To show the current time at the local time zone
-
-
-                        #for f in list_forecast:
-                        #    forecast_temp = f["main"]["temp"]
-#
-                        #for i in forecast_temp:
-                        #    print(i)
-                        #    for p in forecast_temp[i]:
-                        #        print(p, ":", forecast_temp[i][p]) 
-
-
-                        #forecast_temp = [forecast["main"]["temp"] for forecast in list_forecast]
-                        #forecast_temp_high = [forecast["main"]["temp_max"] for forecast in list_forecast]
-                        #
-                        #for o in list_forecast:
-                        #    print(forecast_temp)
-                        #    print(forecast_temp_high)
-#
-                        #print(forecast_temp)
-
-
-                        #for f in list_forecast:
-                        ##print(w["main"])
-                        #    forecast_date = f["dt"]
-                        #    forecast_temp = f["main"]["temp"]
-                        #    forecast_temp_high = f["main"]["temp_max"]
-                        #    forecast_temp_min = f["main"]["temp_min"]
-                        #    forecast_hum = f["main"]["humidity"]
-                        #    forecast_weather = f["weather"]
-                        #    for q in forecast_weather:
-                        #        forecast_weather2 = q["main"]
-                        #        forecast_weather_detail = q["description"]
-                            #print(forecast_date)
-                            #print(forecast_temp)
-                            #print(forecast_temp_high)
-                            #print(forecast_temp_min)
-                            #print(forecast_hum)
-                            #print(forecast_weather2)
-                            #print(forecast_weather_detail)
-                            #print(forecast_temp) 
-
-                        #def toCelcius(forecast_c):         # Convert to Celcius
-                        #    return int(last_refreshed_temp-273.15)
-#
-                        #def toFahrenheit(forecast_f):      # Convert to Fahrenheit
-                        #    return int((last_refreshed_temp-273.15)*9/5+32)
-
-
-
-
-                    
-
-
-
-
-                    # Once result is showing, ask whether the user lives in the city, plans for trip or curious
-                
-
-
-                
-                    
-
-
-
-
+                                            
             except requests.ConnectionError:
                 print("failed to connect")
 
 
 
 
-
-
-
-
-
-        #if response.status_code in [200, 301, 302, 304]:
-        #    data = response.json()
-#   
-        #    # Set up a variable for current time at local time zone
-        #    import tzlocal
-        #    last_time = data["dt"]  # Reference: https://stackoverflow.com/questions/3682748/converting-unix-timestamp-string-to-readable-date        
-        #    unix_timestamp = float(last_time)    
-        #    local_timezone = tzlocal.get_localzone()  #get pytz timezone
-        #    local_time = datetime.fromtimestamp(unix_timestamp, local_timezone)
-        #    
-        #    last_timezone = data["timezone"]
-        #    unix_timezone = float(last_time)    
-        #    local_timezone2 = tzlocal.get_localzone()  #get pytz timezone
-        #    local_time2 = datetime.fromtimestamp(unix_timezone, local_timezone2)
-        #    print(f"{local_time.strftime('%Y-%m-%d %H:%M:%S')}" + "  " f"{(local_time2.strftime('%Z'))}")
-        #    
-        #    # Set up a variable for current weather condition
-        #    list_weather = data["weather"]   
-        #    for w in list_weather:
-        #        print(w["main"])
-        #    
-        #     # Set up a variable for current weather condition - more description
-        #    for w in list_weather:         
-        #        print(w["description"])     
-#   
-        #    # Set up a variable for current temp
-        #    last_refreshed_temp = data["main"]["temp"] 
-        #    
-        #    def toCelcius(last_refreshed_temp):         # Convert to Celcius
-        #        return int(last_refreshed_temp-273.15)
-        #
-        #    def toFahrenheit(last_refreshed_temp):      # Convert to Fahrenheit
-        #        return int((last_refreshed_temp-273.15)*9/5+32)
-        #    
-        #    print(f"{toCelcius(last_refreshed_temp)}"+"C")  
-        #    print(f"{toFahrenheit(last_refreshed_temp)}"+"F")
-#   
-        #    # Set up a variable for current temp
-        #    last_refreshed_hum = data["main"]["humidity"] 
-        #    print(f"{(last_refreshed_hum)}"+"%")
-
-
-
-
-
-
-
-        #breakpoint()
-        #print(last_refreshed_time + "    " + current_weather)
-        
-        
-        
-        
-        
-        #print(data['name'])
-        
-        
-        
-        #print(data)
-     
-
-        
-        
-        #print(response.status_code) #> 200
-
-       
-
-        #try:
-        #    parsed_response["name"]
-        #    print(parsed_response["name"])
-
-
-
-        #if user_input == "london":
-        #    print("OK!")
-        #    exit()
-        #else:
-        #    print("OOPS. Please try again")        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    #    except: #> "OOPS" will generate below error message
-    #        print("-------------------------")
-    #        print("ERROR MESSAGE:")
-    #        print("SORRY. WE COULD NOT FIND ANY TRADING DATA FOR THE ENTERED STOCK SYMBOL.\n"+
-    #        "PLEASE CHECK THE SYMBOL AND TRY IT AGAIN")
-    #        exit()
-        #return parsed_response
-
-
-
-
-            
-
-
-
-
-
-#
-#        try:
-#           parsed_response["name"]
-#        except: #> "OOPS" will generate below error message
-#           print("-------------------------")
-#           print("ERROR MESSAGE:")
-#           print("SORRY. WE COULD NOT FIND ANY TRADING DATA FOR THE ENTERED STOCK SYMBOL.\n"+
-#           "PLEASE CHECK THE SYMBOL AND TRY IT AGAIN")
-#           exit()
-        
-        
-        
-        
-        
-        
-        
- #       parsed_response = get_response(user_input)
-
-
-
-
-
-
-
-
-
-
-
-
-
-#def get_response(user_input):  #> To define and return the result after user input. 
-#    request_url = f"api.openweathermap.org/data/2.5/weather?q=London,uk&APPID={api_key}"
-#    response = requests.get(request_url)
-#    parsed_response = json.loads(response.text)
-#    #print(response.status_code) #> 200
-#
-#    try:
-#        parsed_response["name"]
-#    except: #> "OOPS" will generate below error message
-#        print("-------------------------")
-#        print("ERROR MESSAGE:")
-#        print("SORRY. WE COULD NOT FIND ANY TRADING DATA FOR THE ENTERED STOCK SYMBOL.\n"+
-#        "PLEASE CHECK THE SYMBOL AND TRY IT AGAIN")
-#        exit()
-
-    #return parsed_response
+ 
 
 #if __name__ == "__main__":
 #    # Welcome message.
