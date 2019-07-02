@@ -302,7 +302,7 @@ if __name__ == "__main__":
                                 file_name3 = "forecast" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S") + ".csv"
                                 csv_file_path3 = os.path.join(os.path.dirname(__file__), "..", "data", file_name3)
     
-                                csv_headers = ["City", "Code", "Time", "Temp(C)", "High(C)", "Low(C)", "Temp(F)", "High(F)", "Low(F)", "Temp(C)", "Temp(F)", "Humidity(%)"]
+                                csv_headers = ["City", "Code", "Time", "Temp(C)", "High(C)", "Low(C)", "Temp(F)", "High(F)", "Low(F)", "Humidity(%)"]
     
                                 with open(csv_file_path3, "w", newline='') as csv_file:
                                     writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
@@ -383,7 +383,8 @@ if __name__ == "__main__":
                                         #
                                         driver.get("https://www.google.com/")
                                         print(driver.title) #> Google
-                                        driver.save_screenshot("search_page.png")  
+                                        file_name4_1 = "search_results_a" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                        driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name4_1))
                                         #
                                         # FIND AN ELEMENT TO INTERACT WITH...
                                         # a reference to the HTML element:
@@ -397,8 +398,8 @@ if __name__ == "__main__":
                                         searchbox.send_keys(search_term)
                                         searchbox.send_keys(Keys.RETURN)
                                         print(driver.title) #> user_input city or zipcode - Google Search'
-                                        file_name4 = "search_results" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
-                                        driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name4))
+                                        file_name4_a = "search_results" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                        driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name4_a))
                                         break                        
                                 break       
                                 
@@ -419,7 +420,8 @@ if __name__ == "__main__":
                                 #
                                 driver.get("https://www.google.com/")
                                 print(driver.title) #> Google
-                                driver.save_screenshot("search_page.png")  
+                                file_name5_1 = "search_results_1" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name5_1)) 
                                 #
                                 # FIND AN ELEMENT TO INTERACT WITH...
                                 # a reference to the HTML element:
@@ -440,8 +442,8 @@ if __name__ == "__main__":
                                 searchbox.send_keys(Keys.RETURN)
                                 
                                 print(driver.title) #> user_input city or zipcode - Google Search'
-                                file_name5 = "search_results_1" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
-                                driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name5))
+                                file_name5_a = "search_results_a" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name5_a))
                                 break
     
                                 # Let user decide to close the web browser. Once closing, it moves to the next.
@@ -472,6 +474,10 @@ if __name__ == "__main__":
                                 "currrent_weather_description": str(weather_description),
                                 "current_temp_C": str(toCelcius(last_refreshed_temp)),
                                 "current_temp_F": str(toFahrenheit(last_refreshed_temp)),
+                                "high_temp_C": str(toCelcius(last_refreshed_temp_max)),
+                                "high_temp_F": str(toFahrenheit(last_refreshed_temp_max)),
+                                "low_temp_C": str(toCelcius(last_refreshed_temp_min)),
+                                "low_temp_F": str(toFahrenheit(last_refreshed_temp_min)),                                
                                 "current_hum": str((last_refreshed_hum)),
                                 "friendly_advice": str(my_message),
                             }
