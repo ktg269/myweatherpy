@@ -13,7 +13,6 @@ import pprint
 import string
 import base64
 
-
 from sendgrid import SendGridAPIClient    # To use the sendgrid email receipt feature
 from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition, ContentId
 from dotenv import load_dotenv  # To reference the .env which includes credential information. 
@@ -34,7 +33,7 @@ def easy_timestamp(time):    #>'2019-06-21 14:00:00' (reference: from prior clas
 
 def toCelcius(ltemp):         # Convert to Celcius
     return int(ltemp-273)
-    
+
 def toFahrenheit(ltemp):      # Convert to Fahrenheit
     return int((ltemp-273.15)*9/5+32)
 
@@ -44,6 +43,7 @@ if __name__ == "__main__":
     print("Welcome to MyWeatherPy. We are here to help you to provide information\n"
                 "about your curiosity in the weather condition for you!")
     print("------------------------------")
+    
     # Ask User Input
     confirmation = input("Are you ready to explore MyWeatherPy?\n" 
                         "------------------------------\n"
@@ -66,7 +66,6 @@ if __name__ == "__main__":
         while True:
             user_input = input("Please enter your input here:   ")
     
-            #TODO: work on format
             if user_input =="help":  # Reference: https://realpython.com/python-csv/#reading-csv-files-with-csv
                 csv_file_path = os.path.join(os.path.dirname(__file__), "..", "list", "countrycode.csv")
                 with open(csv_file_path, "r") as csv_file:
@@ -93,7 +92,7 @@ if __name__ == "__main__":
                 print("Oops. It looks like you just hit the enter by mistake. Please provide us your input!")
                 print("-------------------------")
     
-            elif user_input in ["!","@","#","$","%","^","&","*",")","(","-","_","=","+","[","}","[","{",":",";","'",'"',"/","?",".",">",",","<","`","~"]:
+            elif user_input in ["!","@","#","$","%","^","&","*",")","(","-","_","=","+","[","}","[","{",":",";","'",'"',"/","?",".",">",",","<","`","~"]: # PRELIM validation if the user inputs special character.
                 print("-------------------------")
                 print("ERROR MESSAGE:")
                 print("OH, PLEASE ONLY USE THE LETTERS or 5 DIGIT ZIP CODE FOR YOUR INPUT. PLEASE TRY AGAIN.")
@@ -109,9 +108,7 @@ if __name__ == "__main__":
                     if response.status_code in [200, 300]:
                     
                         data = response.json()
-    
-    
-                        current_time = datetime.now()  #> current time
+                        current_time = datetime.now()  
                         formatted_current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")  
                         
                         local_lon = data["coord"]["lon"] # To set up local time (based on input) using latitude/longitutde
@@ -126,8 +123,7 @@ if __name__ == "__main__":
                         formatted_localdatetime = localdatetime.strftime('%Y-%m-%d %H:%M:%S')
                         formatted_localdatetimezone = localdatetime.strftime('%Z')
                         
-    
-                        # Set up a variable for latest refresh time at timezone where the script is run (the region for the search)
+                        # Set up a variable for latest refresh time at the user's timezone where the script is run (to provide accurate result since there is a little delay between the report time vs my timezone time now)
                         import tzlocal
                         last_time = data["dt"]  # Reference: https://stackoverflow.com/questions/3682748/converting-unix-timestamp-string-to-readable-date        
                         unix_timestamp = float(last_time)    
@@ -139,24 +135,7 @@ if __name__ == "__main__":
                         unix_timezone = float(last_timezone)    
                         my_timezone2 = tzlocal.get_localzone()  #get pytz timezone
                         my_time2 = datetime.fromtimestamp(unix_timezone, my_timezone2)
-                        formatted_my_time2 = my_time2.strftime('%Z')
-                        #print(f"{my_time.strftime('%Y-%m-%d %H:%M:%S')}" + "  " f"{(my_time2.strftime('%Z'))}")
-    
-                        #print(my_time)
-                                       
-    
-                        #localrefreshdatetime = utcmoment.astimezone(pytz.timezone(my_time))
-                        #formatted_localrefreshdatetime = localrefreshdatetime.strftime('%Y-%m-%d %H:%M:%S')
-                        #print(formatted_localrefreshdatetime)
-    
-                        # To show the current time at the local time zone
-                        #last_refreshed_local_time = datetime.fromtimestamp(last_time).strftime('%Y-%m-%d %H:%M:%S')
-                        #current_local_time = datetime.fromtimestamp(unix_timestamp)
-                        #friendly_current_local_time = current_local_time.strftime('%Y-%m-%d %H:%M:%S')
-                        
-                        #friendly_local_time = datetime.fromtimestamp(unix_timestamp)   #reference: https://stackoverflow.com/questions/3682748/converting-unix-timestamp-string-to-readable-date
-                        #friendly_local_timezone = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(unix_timestamp))  #TODO: Need to fix the timezone display
-                        #print(f"{friendly_local_time}" + "  " f"{friendly_local_timezone}")           
+                        formatted_my_time2 = my_time2.strftime('%Z')       
     
                         # Set up city name and country code
                         city_name = data["name"]
@@ -165,10 +144,9 @@ if __name__ == "__main__":
                         # Set up a variable for current weather condition
                         list_weather = data["weather"]   
                         for w in list_weather:
-                            #print(w["main"])
                             weather_condition = w["main"]
                         
-                        # Set up wheather id for customized messsage
+                        # Set up friendly advice/recommendation based upon the weather condition using "id"
                         for w in list_weather:
                             weather_id = w["id"]
     
@@ -188,7 +166,7 @@ if __name__ == "__main__":
                         if weather_id in [801,802,803,804]:
                             my_message = "It is cloudy outside, but it is not too bad."    
     
-                         # Set up a variable for current weather condition - more description
+                        # Set up a variable for current weather condition - more description (longer description than "weather")
                         for w in list_weather:         
                             #print(w["description"])  
                             weather_description = w["description"]
@@ -202,7 +180,6 @@ if __name__ == "__main__":
                         # Set up a variable for current temp min
                         last_refreshed_temp_min = data["main"]["temp_min"] 
 
-    
                         # Set up a variable for current humidity
                         last_refreshed_hum = data["main"]["humidity"] 
                         #print(f"{(last_refreshed_hum)}"+"%")
@@ -210,28 +187,27 @@ if __name__ == "__main__":
                         print("------------------------------")
                         print("Here is the result:")
                         print("------------------------------")
-                        print("Name of city and country:  " f"{city_name}" + "  " f"{city_code}")
-                        print("Current Local Time based on your input:  " f"{formatted_localdatetime}" " " f"{formatted_localdatetimezone}")
-                        print("Current Time based on your location: " f"{formatted_current_time}" " " f"{formatted_my_time2}")
-                        #print("Last Refreshed at local time: " f"{last_refreshed_local_time}" + "  " f"{friendly_local_timezone}")
-                        print("Last Refreshed based on your location: " f"{formatted_my_time}" + "  " f"{formatted_my_time2}")                  
+                        print("Name of city and country code:              " f"{city_name}" + "  " f"{city_code}")
+                        print("Current Local Time based on your input:     " f"{formatted_localdatetime}" " " f"{formatted_localdatetimezone}")
+                        print("Current Time based on your location:        " f"{formatted_current_time}" " " f"{formatted_my_time2}")
+                        print("Last Refreshed based on your location:      " f"{formatted_my_time}" + " " f"{formatted_my_time2}")                  
                         print("------------------------------") 
-                        print("Weather Condition: " f"{weather_condition}")
-                        print("Weather Additional Description: " f"{weather_description}")
+                        print("Weather Condition:                          " f"{weather_condition}")
+                        print("Weather Additional Description:             " f"{weather_description}".title())
                         print("------------------------------")
-                        print("Current Temperature in Celcius: " f"{toCelcius(last_refreshed_temp)}"+"C")
-                        print("Current Temperature in Fahrenheit: " f"{toFahrenheit(last_refreshed_temp)}"+"F")
-                        print("Highest Temperature for the day in Celcius: " f"{toCelcius(last_refreshed_temp_max)}"+"C")
-                        print("Highest Temperature for the day in Fahrenheit: " f"{toFahrenheit(last_refreshed_temp_max)}"+"F")
-                        print("Lowest Temperature for the day in Celcius: " f"{toCelcius(last_refreshed_temp_min)}"+"C")
-                        print("Lowest Temperature for the day in Fahrenheit: " f"{toFahrenheit(last_refreshed_temp_min)}"+"F")
+                        print("Current Temperature in Celcius:             " f"{toCelcius(last_refreshed_temp)}"+"C")
+                        print("Current Temperature in Fahrenheit:          " f"{toFahrenheit(last_refreshed_temp)}"+"F")
+                        print("Highest Temperature today in Celcius:       " f"{toCelcius(last_refreshed_temp_max)}"+"C")
+                        print("Highest Temperature today in Fahrenheit:    " f"{toFahrenheit(last_refreshed_temp_max)}"+"F")
+                        print("Lowest Temperature today in Celcius:        " f"{toCelcius(last_refreshed_temp_min)}"+"C")
+                        print("Lowest Temperature today in Fahrenheit:     " f"{toFahrenheit(last_refreshed_temp_min)}"+"F")
                         print("------------------------------")
-                        print("Current Humidity Level is:  " f"{(last_refreshed_hum)}"+"%")
+                        print("Current Humidity Level is:                  " f"{(last_refreshed_hum)}"+"%")
                         print("-------------------------")
-                        print("Friendly Advice (based on the weather condition): " f"{my_message}")
+                        print("Recommendation (on the selected location):  " f"{my_message}")
                         print("-------------------------")
     
-                        #Writine CSV file for current weather output.
+                        # Writing CSV file for current weather output.
                         file_name2 = "current" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".csv"
                         csv_file_path2 = os.path.join(os.path.dirname(__file__), "..", "data", file_name2)
                         csv_headers = ["City", "Code", "My Time", "Local Time", "Weather", "Temp(C)", "Temp(F)", "High Temp(C)", "High Temp(F)", "Low Temp(C)", "Low Temp(F)", "Humidity(%)"]
@@ -255,6 +231,7 @@ if __name__ == "__main__":
                         print("Your result has been saved in /data folder with city name, code and current time.")
                         print("-------------------------")
                     else:
+                        # Error message if user input cannot be found in API. If 404, provide cannot be found. If other error code, encourage the user to try it again in a little bit.
                         print("ERROR: " +f"{response.status_code}")
                         if response.status_code ==404:
                             print("PAGE NOT FOUND OR SERVER NOT FOUND. PLEASE CHECK AND TRY AGAIN. GOOD-BYE.")
@@ -264,11 +241,11 @@ if __name__ == "__main__":
                             print("THE SERVICE IS CURRENTLY UNAVAILABLE. PLEASE CHECK TRY IT AGAIN IN A LITTLE BIT.")
                             exit()
     
-                        # To set up next 5 days forecast
+                    # To set up next 5 days forecast
     
                     pause_input = input("Please review the result. When ready, please press any button to see the weather forecast:  ")
                     print("-------------------------")
-    
+
                     request_url_4 = f"https://api.openweathermap.org/data/2.5/forecast?zip={user_input}&appid={API_KEY}"
                     request_url_3 = f"http://api.openweathermap.org/data/2.5/forecast?q={user_input}&mode=json&appid={API_KEY}"
                     response = requests.get(url = request_url_4) or requests.get(url = request_url_3)
@@ -276,15 +253,14 @@ if __name__ == "__main__":
                     if response.status_code in [200, 300]:
                         data1 = response.json()
                        
-                        # Set up a variable for f
-    
                         list_forecast = data1["list"]                    
                                                                                                                         
                         print("WEATHER FORECAST FOR EVERY 3 HOURS FOR THE NEXT 5 DAYS!")
                         print("-------------------------")
                         print("Your Selected City: " f"{city_name}" + "  " f"{city_code}")
                         print("Date & Time", "\t", "\tWeather", "Temp(C)", "High(C)", "Low(C)", "Temp(F)", "High(F)", "Low(F)", "\tHumidity(%)")
-                        print("-------------------------")    
+                        print("-------------------------")  
+
                         for f in list_forecast:
                             forecast_date = f["dt"]
                             forecast_unix_timestamp = float(forecast_date)    
@@ -300,6 +276,8 @@ if __name__ == "__main__":
                                 forecast_weather_id = q["id"]
                                 print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} \t{forecast_weather2} \t{toCelcius(forecast_temp)}C \t{toCelcius(forecast_temp_high)}C \t{toCelcius(forecast_temp_min)}C \t{toFahrenheit(forecast_temp)}F \t{toFahrenheit(forecast_temp_high)}F \t{toFahrenheit(forecast_temp_min)}F \t{forecast_hum}%")
                                 
+                                # To store the forecast information in CSV file
+
                                 file_name3 = "forecast" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S") + ".csv"
                                 csv_file_path3 = os.path.join(os.path.dirname(__file__), "..", "data", file_name3)
     
@@ -324,19 +302,27 @@ if __name__ == "__main__":
                                     })
                         print("-------------------------") 
                         print("Your result has been saved in /data folder under name forecast, city name, code and current time. ")                       
-                        print("-------------------------")   
+                        print("-------------------------")  
+
+                        # Ask user why they are using this app for more customized output
+                         
                         while True:
                             choice = input("WHAT IS THE REASON FOR YOUR SEARCH OF WEATHER CONDITION?\n"
+                            "\n"
                             "1. Traveling the area (Vacation, Work, Family Visit etc)\n"
                             "2. Currently Living in the area\n"
                             "3. Being bored. Just Killing time\n"
                             "4. I am done. I want to exit\n"
+                            "\n"
                             "Your Choice:  ") 
+                            
                             if choice =="1":
                                 print("------------------------------")
                                 print("Great. If you have not fully finalized your travel plan yet, these websites can help you to complete your exciting trip!\n")
                                 csv_file_path1 = os.path.join(os.path.dirname(__file__), "..", "list", "travel_vendor.csv")
                                 
+                                # To read the travel partner list from csv
+
                                 with open(csv_file_path1, "r") as csv_file:
                                     csv_reader = csv.reader(csv_file, delimiter=',')
                                     line_count = 0
@@ -350,13 +336,16 @@ if __name__ == "__main__":
                                             print(dict_csv)
                                             line_count += 1         
                                 print("-------------------------")
+
                                 while True:
                                     open_web = input("If you want to navigate any website above, please press the number: ")
                                     if open_web not in ["1","2","3","4","5","6","7","8","9","10","11"]:
                                         print("Oops. Please make your selection again.")
-                                        
+
+                                       
                                     else:
                                         # Referece: https://stackoverflow.com/questions/46416570/how-to-format-a-list-of-dictionaries-from-csv-python    
+                                        # read from CSV file for user input (based on id) as another input to automated search using ChromeDriver 
                                         suggestion_list =[]                               
                                         with open(csv_file_path1) as f:
                                             reader = list(csv.reader(f))
@@ -379,26 +368,26 @@ if __name__ == "__main__":
                                         # Reference: class the Selenium package demonstration
                                         CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chromedriver.exe") # (or wherever yours is installed)
                                         driver = webdriver.Chrome(CHROMEDRIVER_PATH)
-                                        #
+                                        
                                         # NAVIGATE TO GOOGLE.COM
-                                        #
+                                        
                                         driver.get("https://www.google.com/")
                                         print(driver.title) #> Google
                                         file_name4_1 = "search_results_a" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
                                         driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name4_1))
-                                        #
+                                        
                                         # FIND AN ELEMENT TO INTERACT WITH...
                                         # a reference to the HTML element:
-                                        # <input title="Search">
+                                    
                                         searchbox_xpath = '//input[@title="Search"]'
                                         searchbox = driver.find_element_by_xpath(searchbox_xpath)
-                                        #
+                                        
                                         # INTERACT WITH THE ELEMENT
-                                        #
+                                        
                                         search_term = site_search
                                         searchbox.send_keys(search_term)
                                         searchbox.send_keys(Keys.RETURN)
-                                        print(driver.title) #> user_input city or zipcode - Google Search'
+                                        print(driver.title) #> user_input based on id - Google Search'
                                         file_name4_a = "search_results" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
                                         driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name4_a))
                                         break                        
@@ -412,37 +401,36 @@ if __name__ == "__main__":
                             elif choice =="3":
                                 print("------------------------------")
                                 print("No problem. Perhaps, you can read more about the city. You may find it interesting! Here is the website that you can learn more about the city!")
+                                
                                 # Reference: class the Selenium package demonstration
                                 CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chromedriver.exe") # (or wherever yours is installed)
     
                                 driver = webdriver.Chrome(CHROMEDRIVER_PATH)
-                                #
+                                
                                 # NAVIGATE TO GOOGLE.COM
-                                #
+                                
                                 driver.get("https://www.google.com/")
                                 print(driver.title) #> Google
                                 file_name5_1 = "search_results_1" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
                                 driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name5_1)) 
-                                #
+                                
                                 # FIND AN ELEMENT TO INTERACT WITH...
                                 # a reference to the HTML element:
-                                # <input title="Search">
     
                                 searchbox_xpath = '//input[@title="Search"]'
                                 searchbox = driver.find_element_by_xpath(searchbox_xpath)
     
-                                #
                                 # INTERACT WITH THE ELEMENT
-                                #
-    
+                                
+                                # To convert user input to city name and country code for purposes of web search. (finding based on zipcode may not provide an efficient result to navigate through)
                                 if user_input.isnumeric():
                                     search_term = city_name + " " + city_code
                                 else:    
                                     search_term = user_input
+
                                 searchbox.send_keys(search_term)
                                 searchbox.send_keys(Keys.RETURN)
-                                
-                                print(driver.title) #> user_input city or zipcode - Google Search'
+                                print(driver.title) #> city name and code - Google Search'
                                 file_name5_a = "search_results_a" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
                                 driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name5_a))
                                 break
@@ -453,12 +441,12 @@ if __name__ == "__main__":
                                 print("OK. We hope we provided helpful information for you")
                                 break
                                 
-                                
                             else:
                                 print("OOPS. We do not recognize your choice. Please choose again")
                                 print("------------------------------")
                                 
                         print("------------------------------")
+                        # To provide user an option to receive email with the information including attachment. 
                         final_input = input("Would you like to also receive the output in the email? \n"
                             "We will send the current weather report in the email with your weather forecast attachement.\n"
                             "Press y to receive. Otherwise, press any key to exit: ")
@@ -467,12 +455,12 @@ if __name__ == "__main__":
                             SENDGRID_API_KEY = os.environ.get("sendgrid_api_key", "OOPS, please set env var called 'SENDGRID_API_KEY'")  #private information included in .env
                             SENDGRID_TEMPLATE_ID = os.environ.get("sendgrid_template_ID", "OOPS, please set env var called 'SENDGRID_TEMPLATE_ID'") #private information included in .env
                             MY_ADDRESS = os.environ.get("my_email_address", "OOPS, please set env var called 'MY_EMAIL_ADDRESS'") #private information included in .env
-                            template_data = {   # showing the checkout timestamp and the total price on the email receipt (minimum level of information per instruction)
+                            template_data = {   
                                 "human_friendly_timestamp": str(current_time.strftime("%Y-%m-%d %I:%M %p")),
                                 "human_friednly_timestamp_local_time": str(localdatetime.strftime('%Y-%m-%d %I:%M %p')),
                                 "city_name": str(city_name)+" " +str(city_code),
                                 "current_weather_condition": str(weather_condition),
-                                "currrent_weather_description": str(weather_description),
+                                "currrent_weather_description": str(weather_description).title(),
                                 "current_temp_C": str(toCelcius(last_refreshed_temp)),
                                 "current_temp_F": str(toFahrenheit(last_refreshed_temp)),
                                 "high_temp_C": str(toCelcius(last_refreshed_temp_max)),
@@ -489,10 +477,11 @@ if __name__ == "__main__":
                             message.template_id = SENDGRID_TEMPLATE_ID
                             message.dynamic_template_data = template_data
                             # Sending forecast report file as attached with email. #reference: https://stackoverflow.com/questions/43061813/attach-file-to-email-using-sendgrid
-                            with open(csv_file_path3, 'rb') as f:                             #https://github.com/sendgrid/sendgrid-python/issues/704
+                            
+                            with open(csv_file_path3, 'rb') as f:                            
                                 data_email = f.read()
                                 f.close()
-                            encoded = base64.b64encode(data_email).decode()
+                            encoded = base64.b64encode(data_email).decode()             # reference: https://github.com/sendgrid/sendgrid-python/issues/704
                             attachment = Attachment()
                             attachment.file_content = FileContent(encoded)
                             attachment.file_type = FileType('application/csv')
@@ -508,7 +497,7 @@ if __name__ == "__main__":
                             except Exception as e:
                                 print("OOPS", e.message)
                             print("Your forecast report has been sent to the email address that your provided.")
-                            print("Thank you for using MyweatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the customer and/or encouraging the customer to shop again
+                            print("Thank you for using MyweatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the user and encouragin them to use the app again. 
                             print("------------------------------")
                             print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer service for you.")
                             image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg2.jpg")
@@ -517,7 +506,7 @@ if __name__ == "__main__":
                             exit()
                         else:
                             print("------------------------------")
-                            print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future!") # No email receipt if customer does not select y.
+                            print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future!") # No email receipt unless user selects y.
                             print("------------------------------")
                             print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer experience.")
                             print("Good-Bye~")
@@ -538,63 +527,6 @@ if __name__ == "__main__":
     
     
     
-    
-    
-    #if __name__ == "__main__":
-    #    # Welcome message.
-    #
-    #    print("Welcome to MyWeatherPy. We are here to help you to provide information\n"
-    #            "about your curiosity in the weather condition anywhere")
-    #
-    #    confirmation = input("Are you ready to explore MyWeatherPy? Please press n to exit.\n"
-    #                "Otherwise, please press any button if you would like to proceed:  ")
-    #    while True:
-    #        if confirmation == "n":
-    #            print("Thank you for considering, MyWeatherPy. We hope you visit us again in the future!")
-    #            exit()
-    #
-    #        else:
-    #            user_input = input("Awesome choice ! Please enter zip code, or city name and state to start\n"
-    #                                "For example, you can input 10004 or New York, NY: ")
-    #            parsed_response = get_response(user_input)
-    #
-    
-    
-    
-    
-    
-    
-    
-    
-    
-                                    
-        # Decide whether we want to do command line style application or pop up screen, clickable type or HTML web application
-    
-    
-        
-    
-    
-        
-    
-        
-    
-        # Once result is showing, ask whether the user lives in the city, plans for trip or curious
-    
-    
-        #if live in the city, advise things like take umbrella, be careful icy weather, use sunblock etc
-        #if plan for trip, show other results - website to tripadvisor, priceline, avis car, marriott.com etc. then link it
-        # if just curious, put a link to wikipedia to learn more about the city.
-    
-    
-        # Search for more city, zip code, etc. 
-    
-    
-    
-        # Ask if user want to save the result? and store up to 5?
-    
-    
-    
-        # Ask if user wants to receive the information in the email. Weather they want to receive alert daily/weekly in the email.
     
     
     
