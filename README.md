@@ -1,5 +1,6 @@
-# MyweatherPy (Freestyle Project) by ktg269, Youjam95 (This readme file have been adopted from readme file in 
-(https://github.com/prof-rossetti/robo-advisor-demo-2019/blob/master/README.md) and modified specifically for this app.
+# MyweatherPy (Freestyle Project) by ktg269, Youjam95 
+
+(This readme file have been adopted from readme file in (https://github.com/prof-rossetti/robo-advisor-demo-2019/blob/master/README.md) and modified specifically for this app)
 
 ## Introduction
 
@@ -64,7 +65,7 @@ This app also uses automated google search function depending upon your input us
 1. Go to the website (https://sites.google.com/a/chromium.org/chromedriver/)
 2. Download the version that is appropriate for your operating system.
 3. Unzip the file.
-4. Place the file into data directory of your repository. This application detects the location of ChromeDriver using os.path.join(os.path.dirname(__file__)
+4. Place the file into data directory of your repository. This application detects the location of ChromeDriver using (os.path.join(os.path.dirname(__file__))
 
 ## Setup
 
@@ -95,7 +96,7 @@ pip install pytest
 Run tests:
 
 ```sh
-pytest robo_advisor_test.py
+pytest mytest.py
 
 
 
