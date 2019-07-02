@@ -65,7 +65,7 @@ This app also uses automated google search function depending upon your input us
 1. Go to the website (https://sites.google.com/a/chromium.org/chromedriver/)
 2. Download the version that is appropriate for your operating system.
 3. Unzip the file.
-4. Place the file into data directory of your repository. This application detects the location of ChromeDriver using (os.path.join(os.path.dirname(__file__))
+4. Place the file into data directory of your repository. This application detects the directory/location of ChromeDriver using (os.path.join(os.path.dirname(__file__)) on your operating system. 
 
 ## Setup
 
