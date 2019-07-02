@@ -397,7 +397,8 @@ if __name__ == "__main__":
                                         searchbox.send_keys(search_term)
                                         searchbox.send_keys(Keys.RETURN)
                                         print(driver.title) #> user_input city or zipcode - Google Search'
-                                        driver.save_screenshot("search_results.png")
+                                        file_name4 = "search_results" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                        driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name4))
                                         break                        
                                 break       
                                 
@@ -439,7 +440,8 @@ if __name__ == "__main__":
                                 searchbox.send_keys(Keys.RETURN)
                                 
                                 print(driver.title) #> user_input city or zipcode - Google Search'
-                                driver.save_screenshot("search_results.png")
+                                file_name5 = "search_results_1" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name5))
                                 break
     
                                 # Let user decide to close the web browser. Once closing, it moves to the next.
