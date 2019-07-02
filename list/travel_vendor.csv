@@ -1,12 +1,12 @@
-id,name,type,website
-1,Priceline,Travel Related Services,www.priceline.com
-2,Expedia,Travel Related Services,www.expedia.com
-3,Delta Airline,Airline Ticket,www.delta.com
-4,United Airline,Airline Ticket,www.united.com
-5,American Airline,Airline Ticket,www.aa.com
-6,Amtrak,Train Ticket,www.amtrak.com
-7,Greyhound,Bus Ticket,www.greyhound.com
+id,name                 ,type,website
+1,Priceline,Travel Booking    ,www.priceline.com
+2,Expedia,Travel Booking    ,www.expedia.com
+3,Delta Air   ,Airline Ticket       ,www.delta.com
+4,United Air,Airline Ticket       ,www.united.com
+5,American Air,Airline Ticket       ,www.aa.com           
+6,Amtrak     ,Train Ticket           ,www.amtrak.com
+7,Greyhound,Bus Ticket          ,www.greyhound.com
 8,Marriott,Hotel Reservation,www.marriott.com
-9,Hilton,Hotel Reservation,www.hilton.com
-10,Avis,Car Rental,www.avis.com
-11,Hertz,Car Rental,www.hertz.com
+9,Hilton     ,Hotel Reservation,www.hilton.com
+10,Avis     ,Car Rental             ,www.avis.com
+11,Hertz     ,Car Rental          ,www.hertz.com

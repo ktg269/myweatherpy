@@ -46,9 +46,9 @@ if confirmation == "n":
 else:
     print("------------------------------")
     print("Awesome choice! For the best search result, please consider the followings:\n" 
-        "If you would like to search for U.S. cities, please enter 5-digit zip code (e.g. 10004) for the most accurate result.\n" 
-        "For non-U.S, please ensure to enter BOTH city name and two-letter country code (london,uk) for the best result. \n"
-        "If you are unsure about the country code, please enter help.")
+        "- If you would like to search for U.S. cities, please enter 5-digit zip code (e.g. 10004) for the most accurate result.\n" 
+        "- For non-U.S, please ensure to enter BOTH city name and two-letter country code (london,uk) for the best result. \n"
+        "- If you are unsure about the country code, please enter help.")
 
     #User makes input
 
@@ -63,10 +63,11 @@ else:
                 line_count = 0
                 for row in csv_reader:
                     if line_count ==0:
-                        print(f'        Country name, Code:')
+                        print(f'Country name,    Code:\n')
+                        print("-------------------------")
                         line_count += 1
                     else:
-                        print(f'{row[0]}, {row[1]} {row[2]}')
+                        print(f'{row[0]}, {row[1]}')
                         line_count += 1           
           
         elif user_input.isnumeric() and len(user_input) !=5:  # PRELIM VALIDATION if zip code is not 5 digits. #source: https://stackoverflow.com/questions/30994738/how-to-make-input-only-accept-a-z-etc
@@ -234,7 +235,7 @@ else:
                             "Temp(F)": toFahrenheit(last_refreshed_temp),
                             "Humidity(%)": last_refreshed_hum,
                         })
-                    print("Your result has been saved in /data folder with city name, code and current time")
+                    print("Your result has been saved in /data folder with city name, code and current time.")
                     print("-------------------------")
                 else:
                     print("ERROR: " +f"{response.status_code}")
@@ -302,7 +303,7 @@ else:
                                         "Humidity(%)": x["main"]["humidity"]
                                 })
                     print("-------------------------") 
-                    print("Your result has been saved in /data folder under name forecast, city name, code and current time.")                       
+                    print("Your result has been saved in /data folder under name forecast, city name, code and current time. ")                       
                     print("-------------------------")   
                     while True:
                         choice = input("WHAT IS THE REASON FOR YOUR SEARCH OF WEATHER CONDITION?\n"
@@ -312,7 +313,8 @@ else:
                         "4. I am done. I want to exit\n"
                         "Your Choice:  ") 
                         if choice =="1":
-                            print("Great. If you have not fully finalized your travel plan yet, these websites can help you to complete your exciting trip!")
+                            print("------------------------------")
+                            print("Great. If you have not fully finalized your travel plan yet, these websites can help you to complete your exciting trip!\n")
                             csv_file_path1 = os.path.join(os.path.dirname(__file__), "..", "list", "travel_vendor.csv")
                             
                             with open(csv_file_path1, "r") as csv_file:
@@ -320,11 +322,11 @@ else:
                                 line_count = 0
                                 for row in csv_reader:
                                     if line_count ==0:
-                                        print(f'is, name, type, website:')
-                                        print("-------------------------")
+                                        print(f'id\t name\t \t\ttype\t \t\t website\n')
+                                        
                                         line_count += 1
                                     else:
-                                        dict_csv = f'{row[0]} {row[1]}, {row[2]}, {row[3]}'                                                                        
+                                        dict_csv = f'{row[0]}\t {row[1]}\t \t{row[2]}\t {row[3]}'                                                                        
                                         print(dict_csv)
                                         line_count += 1         
                             print("-------------------------")
@@ -332,7 +334,7 @@ else:
                                 open_web = input("If you want to navigate any website above, please press the number: ")
                                 if open_web not in ["1","2","3","4","5","6","7","8","9","10","11"]:
                                     print("Oops. Please make your selection again.")
-                                    break
+                                    
                                 else:
                                     # Referece: https://stackoverflow.com/questions/46416570/how-to-format-a-list-of-dictionaries-from-csv-python    
                                     suggestion_list =[]                               
@@ -377,14 +379,16 @@ else:
                                     searchbox.send_keys(Keys.RETURN)
                                     print(driver.title) #> user_input city or zipcode - Google Search'
                                     driver.save_screenshot("search_results.png")
-                                    break
-                                   
+                                    break                        
+                            break       
                             
                         elif choice =="2":
+                            print("------------------------------")
                             print("We understand ! Hopefully our service has helped you to plan appropriately.")
-                            
+                            break
                             
                         elif choice =="3":
+                            print("------------------------------")
                             print("No problem. Perhaps, you can read more about the city. You may find it interesting! Here is the website that you can learn more about the city!")
                             # Reference: class the Selenium package demonstration
                             CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chromedriver.exe") # (or wherever yours is installed)
@@ -417,90 +421,82 @@ else:
                             
                             print(driver.title) #> user_input city or zipcode - Google Search'
                             driver.save_screenshot("search_results.png")
-                            
+                            break
 
                             # Let user decide to close the web browser. Once closing, it moves to the next.
                             
                         elif choice =="4":
                             print("OK. We hope we provided helpful information for you")
-                            
+                            break
                             
                             
                         else:
                             print("OOPS. We do not recognize your choice. Please choose again")
                             print("------------------------------")
                             
+                    print("------------------------------")
+                    final_input = input("Would you like to also receive the output in the email? \n"
+                        "We will send the current weather report in the email with your forecast input attachement.\n"
+                        "Press y to receive. Otherwise, press any key to exit: ")
+                    if final_input =="y":
+                        user_email_input = input("PLEASE ENTER YOUR EMAIL ADDRESS: ") # asking user email address for input.
+                        SENDGRID_API_KEY = os.environ.get("sendgrid_api_key", "OOPS, please set env var called 'SENDGRID_API_KEY'")  #private information included in .env
+                        SENDGRID_TEMPLATE_ID = os.environ.get("sendgrid_template_ID", "OOPS, please set env var called 'SENDGRID_TEMPLATE_ID'") #private information included in .env
+                        MY_ADDRESS = os.environ.get("my_email_address", "OOPS, please set env var called 'MY_EMAIL_ADDRESS'") #private information included in .env
+                        template_data = {   # showing the checkout timestamp and the total price on the email receipt (minimum level of information per instruction)
+                            "human_friendly_timestamp": str(current_time.strftime("%Y-%m-%d %I:%M %p")),
+                            "human_freidnly_timestamp_local_time": str(formatted_localdatetime.strftime("%Y-%m-%d %I:%M %p")),
+                            "city_name": str(city_name)+" " +str(city_code),
+                            "current_weather_condition": str(weather_condition),
+                            "currrent_weather_description": str(weather_description),
+                            "current_temp_C": str(toCelcius(last_refreshed_temp)),
+                            "current_temp_F": str(toFahrenheit(last_refreshed_temp)),
+                            "current_hum": str((last_refreshed_hum)),
+                            "friendly_advice": str(my_message),
+                        }
+                        client = SendGridAPIClient(SENDGRID_API_KEY) #> <class 'sendgrid.sendgrid.SendGridAPIClient>
+                        print("CLIENT:", type(client))
+                        message = Mail(from_email=MY_ADDRESS, to_emails=user_email_input) # For to_emails, MY_ADDRESS is replaced with user_input from line 133.
+                        print("MESSAGE:", type(message))
+                        message.template_id = SENDGRID_TEMPLATE_ID
+                        message.dynamic_template_data = template_data
+                        # Sending forecast report file as attached with email. #reference: https://stackoverflow.com/questions/43061813/attach-file-to-email-using-sendgrid
+                        with open(csv_file_path3, 'rb') as f:                             #https://github.com/sendgrid/sendgrid-python/issues/704
+                            data_email = f.read()
+                            f.close()
+                        encoded = base64.b64encode(data_email).decode()
+                        attachment = Attachment()
+                        attachment.file_content = FileContent(encoded)
+                        attachment.file_type = FileType('application/csv')
+                        attachment.file_name = FileName(file_name3)
+                        attachment.disposition = Disposition('attachment')
+                        message.attachment = attachment
+                        try:
+                            response = client.send(message)
+                            print("RESPONSE:", type(response)) #> <class 'python_http_client.client.Response'>
+                            print(response.status_code) #> 202 indicates SUCCESS
+                            print(response.body)
+                            print(response.headers)
+                        except Exception as e:
+                            print("OOPS", e.message)
+                        print("Your forecast report has been sent to the email address that your provided.")
+                        print("Thank you for using MyweatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the customer and/or encouraging the customer to shop again
                         print("------------------------------")
-                        final_input = input("Would you like to also receive the output in the email? \n"
-                            "We will send the current weather report in the email with your forecast input attachement.\n"
-                            "Press y to receive. Otherwise, press any key to exit: ")
-                        if final_input =="y":
-                            user_email_input = input("PLEASE ENTER YOUR EMAIL ADDRESS: ") # asking user email address for input.
-
-                            SENDGRID_API_KEY = os.environ.get("sendgrid_api_key", "OOPS, please set env var called 'SENDGRID_API_KEY'")  #private information included in .env
-                            SENDGRID_TEMPLATE_ID = os.environ.get("sendgrid_template_ID", "OOPS, please set env var called 'SENDGRID_TEMPLATE_ID'") #private information included in .env
-                            MY_ADDRESS = os.environ.get("my_email_address", "OOPS, please set env var called 'MY_EMAIL_ADDRESS'") #private information included in .env
-
-                            template_data = {   # showing the checkout timestamp and the total price on the email receipt (minimum level of information per instruction)
-                                "human_friendly_timestamp": str(current_time.strftime("%Y-%m-%d %I:%M %p")),
-                                "city_name": str(city_name)+" " +str(city_code),
-                                "current_weather_condition": str(weather_condition),
-                                "currrent_weather_description": str(weather_description),
-                                "current_temp_C": str(toCelcius(last_refreshed_temp)),
-                                "current_temp_F": str(toFahrenheit(last_refreshed_temp)),
-                                "current_hum": str((last_refreshed_hum)),
-                                "friendly_advice": str(my_message),
-                            }
-                            client = SendGridAPIClient(SENDGRID_API_KEY) #> <class 'sendgrid.sendgrid.SendGridAPIClient>
-                            print("CLIENT:", type(client))
-
-                            message = Mail(from_email=MY_ADDRESS, to_emails=user_email_input) # For to_emails, MY_ADDRESS is replaced with user_input from line 133.
-                            print("MESSAGE:", type(message))
-
-                            message.template_id = SENDGRID_TEMPLATE_ID
-
-                            message.dynamic_template_data = template_data
-
-                            # Sending forecast report file as attached with email. #reference: https://stackoverflow.com/questions/43061813/attach-file-to-email-using-sendgrid
-                            with open(csv_file_path3, 'rb') as f:                             #https://github.com/sendgrid/sendgrid-python/issues/704
-                                data_email = f.read()
-                                f.close()
-                            encoded = base64.b64encode(data_email).decode()
-                            attachment = Attachment()
-                            attachment.file_content = FileContent(encoded)
-                            attachment.file_type = FileType('application/csv')
-                            attachment.file_name = FileName(file_name3)
-                            attachment.disposition = Disposition('attachment')
-                            message.attachment = attachment
-
-                            try:
-                                response = client.send(message)
-                                print("RESPONSE:", type(response)) #> <class 'python_http_client.client.Response'>
-                                print(response.status_code) #> 202 indicates SUCCESS
-                                print(response.body)
-                                print(response.headers)
-
-                            except Exception as e:
-                                print("OOPS", e.message)
-
-                            print("Your forecast report has been sent to the email address that your provided.")
-                            print("Thank you for using MyweatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the customer and/or encouraging the customer to shop again
-                            print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer experience.")
-                            image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg1.jpg")
-                            img = Image.open(image_path)
-                            img.show()
-                            exit()
-
-                        else:
-                            print("------------------------------")
-                            print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future!") # No email receipt if customer does not select y.
-                            print("------------------------------")
-                            print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer experience.")
-                            print("Good-Bye~")
-                            image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg1.jpg")
-                            img = Image.open(image_path)
-                            img.show()
-                            exit() 
+                        print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer service for you.")
+                        image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg1.jpg")
+                        img = Image.open(image_path)
+                        img.show()
+                        exit()
+                    else:
+                        print("------------------------------")
+                        print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future!") # No email receipt if customer does not select y.
+                        print("------------------------------")
+                        print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer experience.")
+                        print("Good-Bye~")
+                        image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg2.jpg")
+                        img = Image.open(image_path)
+                        img.show()
+                        exit() 
 
                 else:
                     print("ERROR: " +f"{response.status_code}")
