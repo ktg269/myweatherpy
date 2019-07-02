@@ -34,6 +34,7 @@ def easy_timestamp(time):    #>'2019-06-21 14:00:00' (reference: from prior clas
 
 def toCelcius(ltemp):         # Convert to Celcius
     return int(ltemp-273)
+    
 def toFahrenheit(ltemp):      # Convert to Fahrenheit
     return int((ltemp-273.15)*9/5+32)
 
