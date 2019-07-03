@@ -1,4 +1,4 @@
-# MyweatherPy (Freestyle Project) by ktg269, Youjam95 
+# MyweatherPy (Freestyle Project)
 
 (This readme file have been adopted from readme file in (https://github.com/prof-rossetti/robo-advisor-demo-2019/blob/master/README.md) and modified specifically for this app)
 
@@ -97,7 +97,7 @@ Run tests:
 
 ```sh
 pytest mytest.py
-
+'''
 
 
 
