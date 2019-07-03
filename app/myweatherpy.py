@@ -31,7 +31,7 @@ def easy_timestamp(time):    #>'2019-06-21 14:00:00' (reference: from prior clas
     c_time = datetime.now()
     return c_time.strftime("%Y-%m-%d %H:%M:%S")
 
-def toCelcius(ltemp):         # Convert to Celcius
+def toCelsius(ltemp):         # Convert to Celsius
     return int(ltemp-273)
 
 def toFahrenheit(ltemp):      # Convert to Fahrenheit
@@ -59,26 +59,28 @@ if __name__ == "__main__":
         print("Awesome choice! For the best search result, please consider the followings:\n" 
             "- If you would like to search for U.S. cities, please enter 5-digit zip code (e.g. 10004) for the most accurate result.\n" 
             "- For non-U.S, please ensure to enter BOTH city name and two-letter country code (london,uk) for the best result. \n"
-            "- If you are unsure about the country code, please enter help.")
+            "- If you are unsure about the country code, please enter help.\n")
     
         #User makes input
     
         while True:
             user_input = input("Please enter your input here:   ")
-    
+            
             if user_input =="help":  # Reference: https://realpython.com/python-csv/#reading-csv-files-with-csv
+                print("\n")
                 csv_file_path = os.path.join(os.path.dirname(__file__), "..", "list", "countrycode.csv")
                 with open(csv_file_path, "r") as csv_file:
                     csv_reader = csv.reader(csv_file, delimiter=',')
                     line_count = 0
                     for row in csv_reader:
                         if line_count ==0:
-                            print(f'Country name,    Code:\n')
+                            print(f'Country name,    Code:')
                             print("-------------------------")
                             line_count += 1
                         else:
                             print(f'{row[0]}, {row[1]}')
-                            line_count += 1           
+                            line_count += 1
+                                       
               
             elif user_input.isnumeric() and len(user_input) !=5:  # PRELIM VALIDATION if zip code is not 5 digits. #source: https://stackoverflow.com/questions/30994738/how-to-make-input-only-accept-a-z-etc
                 print("-------------------------")
@@ -195,11 +197,11 @@ if __name__ == "__main__":
                         print("Weather Condition:                          " f"{weather_condition}")
                         print("Weather Additional Description:             " f"{weather_description}".title())
                         print("------------------------------")
-                        print("Current Temperature in Celcius:             " f"{toCelcius(last_refreshed_temp)}"+"C")
+                        print("Current Temperature in Celsius:             " f"{toCelsius(last_refreshed_temp)}"+"C")
                         print("Current Temperature in Fahrenheit:          " f"{toFahrenheit(last_refreshed_temp)}"+"F")
-                        print("Highest Temperature today in Celcius:       " f"{toCelcius(last_refreshed_temp_max)}"+"C")
+                        print("Highest Temperature today in Celsius:       " f"{toCelsius(last_refreshed_temp_max)}"+"C")
                         print("Highest Temperature today in Fahrenheit:    " f"{toFahrenheit(last_refreshed_temp_max)}"+"F")
-                        print("Lowest Temperature today in Celcius:        " f"{toCelcius(last_refreshed_temp_min)}"+"C")
+                        print("Lowest Temperature today in Celsius:        " f"{toCelsius(last_refreshed_temp_min)}"+"C")
                         print("Lowest Temperature today in Fahrenheit:     " f"{toFahrenheit(last_refreshed_temp_min)}"+"F")
                         print("------------------------------")
                         print("Current Humidity Level is:                  " f"{(last_refreshed_hum)}"+"%")
@@ -220,11 +222,11 @@ if __name__ == "__main__":
                                 "My Time": formatted_current_time,
                                 "Local Time": formatted_localdatetime,
                                 "Weather": weather_condition,
-                                "Temp(C)": toCelcius(last_refreshed_temp),
+                                "Temp(C)": toCelsius(last_refreshed_temp),
                                 "Temp(F)": toFahrenheit(last_refreshed_temp),
-                                "High Temp(C)": toCelcius(last_refreshed_temp_max),
+                                "High Temp(C)": toCelsius(last_refreshed_temp_max),
                                 "High Temp(F)": toFahrenheit(last_refreshed_temp_max),
-                                "Low Temp(C)": toCelcius(last_refreshed_temp_min),
+                                "Low Temp(C)": toCelsius(last_refreshed_temp_min),
                                 "Low Temp(F)": toFahrenheit(last_refreshed_temp_min),
                                 "Humidity(%)": last_refreshed_hum,
                             })
@@ -274,7 +276,7 @@ if __name__ == "__main__":
                                 forecast_weather2 = q["main"]
                                 forecast_weather_detail = q["description"]
                                 forecast_weather_id = q["id"]
-                                print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} \t{forecast_weather2} \t{toCelcius(forecast_temp)}C \t{toCelcius(forecast_temp_high)}C \t{toCelcius(forecast_temp_min)}C \t{toFahrenheit(forecast_temp)}F \t{toFahrenheit(forecast_temp_high)}F \t{toFahrenheit(forecast_temp_min)}F \t{forecast_hum}%")
+                                print(f"{forecast_my_time.strftime('%Y-%m-%d %I %p')} \t{forecast_weather2} \t{toCelsius(forecast_temp)}C \t{toCelsius(forecast_temp_high)}C \t{toCelsius(forecast_temp_min)}C \t{toFahrenheit(forecast_temp)}F \t{toFahrenheit(forecast_temp_high)}F \t{toFahrenheit(forecast_temp_min)}F \t{forecast_hum}%")
                                 
                                 # To store the forecast information in CSV file
 
@@ -292,9 +294,9 @@ if __name__ == "__main__":
                                             "City": city_name,
                                             "Code": city_code,
                                             "Time": datetime.fromtimestamp(float(x["dt"]), my_timezone).strftime("%Y-%m-%d %I %p"),
-                                            "Temp(C)": toCelcius(x["main"]["temp"]),
-                                            "High(C)": toCelcius(x["main"]["temp_max"]),
-                                            "Low(C)": toCelcius(x["main"]["temp_min"]),
+                                            "Temp(C)": toCelsius(x["main"]["temp"]),
+                                            "High(C)": toCelsius(x["main"]["temp_max"]),
+                                            "Low(C)": toCelsius(x["main"]["temp_min"]),
                                             "Temp(F)": toFahrenheit(x["main"]["temp"]),
                                             "High(F)": toFahrenheit(x["main"]["temp_max"]),
                                             "Low(F)": toFahrenheit(x["main"]["temp_min"]),
@@ -461,11 +463,11 @@ if __name__ == "__main__":
                                 "city_name": str(city_name)+" " +str(city_code),
                                 "current_weather_condition": str(weather_condition),
                                 "currrent_weather_description": str(weather_description).title(),
-                                "current_temp_C": str(toCelcius(last_refreshed_temp)),
+                                "current_temp_C": str(toCelsius(last_refreshed_temp)),
                                 "current_temp_F": str(toFahrenheit(last_refreshed_temp)),
-                                "high_temp_C": str(toCelcius(last_refreshed_temp_max)),
+                                "high_temp_C": str(toCelsius(last_refreshed_temp_max)),
                                 "high_temp_F": str(toFahrenheit(last_refreshed_temp_max)),
-                                "low_temp_C": str(toCelcius(last_refreshed_temp_min)),
+                                "low_temp_C": str(toCelsius(last_refreshed_temp_min)),
                                 "low_temp_F": str(toFahrenheit(last_refreshed_temp_min)),                                
                                 "current_hum": str((last_refreshed_hum)),
                                 "friendly_advice": str(my_message),
@@ -497,7 +499,7 @@ if __name__ == "__main__":
                             except Exception as e:
                                 print("OOPS", e.message)
                             print("Your forecast report has been sent to the email address that your provided.")
-                            print("Thank you for using MyweatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the user and encouragin them to use the app again. 
+                            print("Thank you for using MyWeatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the user and encouragin them to use the app again. 
                             print("------------------------------")
                             print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer service for you.")
                             image_path = os.path.join(os.path.dirname(__file__), "..", "image", "myweatherpyimg2.jpg")
@@ -506,7 +508,7 @@ if __name__ == "__main__":
                             exit()
                         else:
                             print("------------------------------")
-                            print("Thank you, so much again for using MyweatherPy. Hopefully, you will visit us again in the future!") # No email receipt unless user selects y.
+                            print("Thank you, so much again for using MyWeatherPy. Hopefully, you will visit us again in the future!") # No email receipt unless user selects y.
                             print("------------------------------")
                             print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer experience.")
                             print("Good-Bye~")

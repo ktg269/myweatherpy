@@ -6,7 +6,7 @@
 
 Welcome to MyweatherPy Application ! (https://github.com/ktg269/myweatherpy)
 
-This application ("app") will display the current weather information based on user input (Zip code or City name,country code) including 1) current time at the user's location, 2) local time at the searched location 3) weather condition, 4) temperature in Celcius and Fahrenheit, 5) humidity, and 6) friendly advice/recommendation based upon the weather condition. This app will also display the weather forecast for the next 5 days every 3 hours including all the above plus the high and low for the foreacst period. After that, the user is asked the reason for their search.
+This application ("app") will display the current weather information based on user input (Zip code or City name,country code) including 1) current time at the user's location, 2) local time at the searched location 3) weather condition, 4) temperature in Celsius and Fahrenheit, 5) humidity, and 6) friendly advice/recommendation based upon the weather condition. This app will also display the weather forecast for the next 5 days every 3 hours including all the above plus the high and low for the foreacst period. After that, the user is asked the reason for their search.
 Depending upon the user input, customized result will display. User has an option to receipt the weather search result
 in the email including the forecast information attached as a CSV file. 
 
