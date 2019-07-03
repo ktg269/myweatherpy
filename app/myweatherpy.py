@@ -165,7 +165,7 @@ if __name__ == "__main__":
                             my_message = "The weather is nice and clear. Enjoy your day!"
     
                         if weather_id in [801,802,803,804]:
-                            my_message = "It is cloudy outside, but it is not too bad."    
+                            my_message = "It is cloudy outside, but it is not too bad. Hope you can still enjoy your day ! "    
     
                         # Set up a variable for current weather condition - more description (longer description than "weather")
                         for w in list_weather:         
@@ -393,7 +393,40 @@ if __name__ == "__main__":
                                 
                             elif choice =="2":
                                 print("------------------------------")
-                                print("We understand ! Hopefully our service has helped you to plan appropriately.")
+                                print("We understand ! Hopefully our service has helped you to plan appropriately.\n"
+                                    "If you are interested, we will help you to navigate events or other things going on in your town now")
+
+                                # Reference: class the Selenium package demonstration
+                                CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "chromedriver.exe") # (or wherever yours is installed)
+    
+                                driver = webdriver.Chrome(CHROMEDRIVER_PATH)
+                                
+                                # NAVIGATE TO GOOGLE.COM
+                                
+                                driver.get("https://www.google.com/")
+                                print(driver.title) #> Google
+                                file_name6_1 = "search_results_1" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name6_1)) 
+                                
+                                # FIND AN ELEMENT TO INTERACT WITH...
+                                # a reference to the HTML element:
+    
+                                searchbox_xpath = '//input[@title="Search"]'
+                                searchbox = driver.find_element_by_xpath(searchbox_xpath)
+    
+                                # INTERACT WITH THE ELEMENT
+                                
+                                # To convert user input to city name and country code for purposes of web search. (finding based on zipcode may not provide an efficient result to navigate through)
+                                if user_input.isnumeric():
+                                    search_term = "What are the things going on in" + " " + city_name + " " + city_code +" " + 'today or this weekend?'
+                                else:    
+                                    search_term = "What are the things going on in" + " " + user_input + " " + 'today or this weekend?'
+
+                                searchbox.send_keys(search_term)
+                                searchbox.send_keys(Keys.RETURN)
+                                print(driver.title) #> city name and code - Google Search'
+                                file_name6_a = "search_results_a" + city_name + city_code + current_time.strftime("%Y-%m-%d-%H-%M-%S.%f") + ".png"
+                                driver.save_screenshot(os.path.join(os.path.dirname(__file__), "..", "data", file_name6_a))
                                 break
                                 
                             elif choice =="3":
@@ -422,9 +455,9 @@ if __name__ == "__main__":
                                 
                                 # To convert user input to city name and country code for purposes of web search. (finding based on zipcode may not provide an efficient result to navigate through)
                                 if user_input.isnumeric():
-                                    search_term = city_name + " " + city_code
+                                    search_term = "learn more about" + " " + city_name + " " + city_code
                                 else:    
-                                    search_term = user_input
+                                    search_term = "learn more about" + " " + user_input
 
                                 searchbox.send_keys(search_term)
                                 searchbox.send_keys(Keys.RETURN)
