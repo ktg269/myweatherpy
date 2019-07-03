@@ -81,7 +81,6 @@ if __name__ == "__main__":
                             print(f'{row[0]}, {row[1]}')
                             line_count += 1
                                        
-              
             elif user_input.isnumeric() and len(user_input) !=5:  # PRELIM VALIDATION if zip code is not 5 digits. #source: https://stackoverflow.com/questions/30994738/how-to-make-input-only-accept-a-z-etc
                 print("-------------------------")
                 print("ERROR MESSAGE:")
@@ -255,8 +254,7 @@ if __name__ == "__main__":
                     if response.status_code in [200, 300]:
                         data1 = response.json()
                        
-                        list_forecast = data1["list"]                    
-                                                                                                                        
+                        list_forecast = data1["list"]                                                                                                           
                         print("WEATHER FORECAST FOR EVERY 3 HOURS FOR THE NEXT 5 DAYS!")
                         print("-------------------------")
                         print("Your Selected City: " f"{city_name}" + "  " f"{city_code}")
@@ -331,7 +329,6 @@ if __name__ == "__main__":
                                     for row in csv_reader:
                                         if line_count ==0:
                                             print(f'id\t name\t \t\ttype\t \t\t website\n')
-                                            
                                             line_count += 1
                                         else:
                                             dict_csv = f'{row[0]}\t {row[1]}\t \t{row[2]}\t {row[3]}'                                                                        
@@ -343,8 +340,7 @@ if __name__ == "__main__":
                                     open_web = input("If you want to navigate any website above, please press the number: ")
                                     if open_web not in ["1","2","3","4","5","6","7","8","9","10","11"]:
                                         print("Oops. Please make your selection again.")
-
-                                       
+            
                                     else:
                                         # Referece: https://stackoverflow.com/questions/46416570/how-to-format-a-list-of-dictionaries-from-csv-python    
                                         # read from CSV file for user input (based on id) as another input to automated search using ChromeDriver 
@@ -498,7 +494,7 @@ if __name__ == "__main__":
                                 print(response.headers)
                             except Exception as e:
                                 print("OOPS", e.message)
-                            print("Your forecast report has been sent to the email address that your provided.")
+                            print("Your forecast report has been sent to the email address that you provided.")
                             print("Thank you for using MyWeatherPy. We hope to see you again. Good-Bye ~") # A friendly message thanking the user and encouragin them to use the app again. 
                             print("------------------------------")
                             print("Any feedback for us? Please email us at myweatherpy@gmail.com and provide us an opportunity to improve our customer service for you.")
